@@ -1,0 +1,187 @@
+﻿@using FindMyChair.Models.Meetings;
+@using System;
+@using System.Globalization;
+@using FindMyChair.Types;
+@using FindMyChair.Client;
+@using FindMyChair.Utilities;
+@using System.Text;
+@model List<Meeting>
+@{
+	var timeCounter = 0;
+	var scraperUtility = new ScraperUtilities();
+	var aaClient = new AAClient();
+	var today = aaClient.GetCurrentDay();
+}
+@if (null != Model)
+{
+	<section class="inner-content">
+		@foreach (var meeting in Model)
+		{
+			var counter = 0;
+			<div class="meeting-wrapper">
+				<h3>
+					@meeting.GroupName
+					@foreach (var district in meeting.Address.Districts)
+					{
+						if (counter > 0)
+						{
+							@Html.Raw(",&nbsp;");
+						}
+						else
+						{
+							@Html.Raw("&nbsp;-&nbsp;");
+						}
+						<span class="meeting-seperator" name='@string.Format("{0}_{1}", meeting.Id, district.Id)¨'>@district.DistrictName.Trim()</span>
+						counter++;
+					}
+				</h3>
+				<div class="meeting-info-wrapper">
+					<div class="meeting-info">
+						@if (meeting.HandicapFriendly)
+						{
+							<span class="circle handicap-friendly"></span>
+						}
+						@if (!string.IsNullOrWhiteSpace(meeting.Address.LocationLink) &&
+							(!string.IsNullOrWhiteSpace(meeting.Address.Street) ||
+							!string.IsNullOrWhiteSpace(meeting.Address.City)))
+						{
+							<div>
+								<div class="location-icon"></div>
+								<span class="meeting-title">Besöksadress:</span>
+								<span clas="meeting-address">
+									<a href="@meeting.Address.LocationLink" title="@meeting.GroupName" class="meeting-address-link-location">
+										@if (!string.IsNullOrWhiteSpace(meeting.Address.Street) && !string.IsNullOrWhiteSpace(meeting.Address.City))
+										{
+											<span>@string.Format("{0}, {1}", meeting.Address.Street, meeting.Address.City)</span>
+										}
+										else
+										{
+											<span>@string.Format("{0}{1}", meeting.Address.Street, meeting.Address.City)</span>
+										}
+									</a>
+								</span>
+							</div>
+						}
+						@if (!string.IsNullOrWhiteSpace(meeting.Place))
+						{
+							<div>
+								<span clas="meeting-place">
+									<span>@meeting.Place</span>
+								</span>
+							</div>
+						}
+						@if (!string.IsNullOrWhiteSpace(meeting.Email))
+						{
+							<div>
+								<span class="meeting-title">E-post:</span>
+								<span clas="meeting-email">
+									<a href="@meeting.Email" title="@meeting.GroupName" class="meeting-address-link-email">
+										<span>@meeting.Email</span>
+									</a>
+								</span>
+							</div>
+						}
+						@if (!string.IsNullOrWhiteSpace(meeting.Phone))
+						{
+							<div>
+								<span class="meeting-title">Telefon:</span>
+								<span clas="meeting-phone">
+									<span>@meeting.Phone</span>
+								</span>
+							</div>
+						}
+						@if (!string.IsNullOrWhiteSpace(meeting.Note))
+						{
+							<div>
+								<span class="meeting-note">
+									<span>@Html.Raw(meeting.Note)</span>
+								</span>
+							</div>
+						}
+					</div>
+					<div class="meeting-additional-info-wrapper">
+						@if (null != meeting.AdditionalInfo && meeting.AdditionalInfo.Any())
+						{
+							<div class="meeting-additional-information-expand" data-toggle="collapse"
+								 href="#additionalInformation_@meeting.Id"
+								 role="button"
+								 aria-expanded="false"
+								 aria-controls="additionalInformation_@meeting.Id"><span class="expand"></span><span class="expand-text">Mer Information</span></div>
+							<div class="meeting-additional-info collapse multi-collapse" id="additionalInformation_@meeting.Id">
+								@foreach (var infoHtml in meeting.AdditionalInfo)
+								{
+									if (!infoHtml.Trim().ToLower().StartsWith("<a"))
+									{
+										<span>@Html.Raw(infoHtml)</span>
+									}
+								}
+							</div>
+						}
+						@if (!string.IsNullOrWhiteSpace(meeting.AdditionalInformationHtmlString)
+							&& null == meeting.AdditionalInfo && !meeting.AdditionalInfo.Any())
+						{
+							<div class="meeting-additional-information-expand">Mer Information</div>
+							<div class="meeting-additional-info">
+								<span class="meeting-additional-information">
+									<span>@Html.Raw(meeting.AdditionalInformationHtmlString)</span>
+								</span>
+							</div>
+						}
+					</div>
+				</div>
+				<div class="meeting-schedule-wrapper">
+					@if (null != meeting.DayAndTime && meeting.DayAndTime.Any())
+					{
+						timeCounter = 0;
+						<table class="meeting-table">
+							<thead>
+								<tr>
+									@foreach (var schedule in meeting.DayAndTime.Values.FirstOrDefault())
+									{
+										var dayName = Enum.GetName(typeof(WeekdayNamesSV), schedule.Key);
+										<th>
+											@dayName
+										</th>
+									}
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var dayRows in meeting.DayAndTime.Values)
+								{
+									<tr>
+										@foreach (var meetingSpecific in dayRows.Values)
+										{
+											var dateTime = new DateTime(Math.Abs(meetingSpecific.StartTime.Ticks));
+											var formattedTime = dateTime.ToString("HH:mm", CultureInfo.CurrentCulture);
+											var todayClass = string.Empty;
+											if (dateTime.Ticks > 0)
+											{
+												if (meetingSpecific.MeetingDay == today
+														&& dateTime.Ticks > DateTime.Now.TimeOfDay.Ticks)
+												{
+													todayClass = "meeting-today";
+												}
+											}
+											<td@(timeCounter > 0 && dateTime.Ticks > 0 ? Html.Raw(" class='additional-time'") : Html.Raw("")) style="background-color: @scraperUtility.GetMeetingTypesColorAA(meetingSpecific.MeetingType);">
+												@if (dateTime.Ticks > 0)
+												{
+													<span class="meeting-table-time @todayClass">@formattedTime</span>
+												}
+												else
+												{
+													<span class="meeting-table-time">&nbsp;</span>
+												}
+												</td>
+												formattedTime = string.Empty;
+											}
+								</tr>
+								timeCounter++;
+							}
+							</tbody>
+						</table>
+					}
+				</div>
+			</div>
+		}
+	</section>
+}

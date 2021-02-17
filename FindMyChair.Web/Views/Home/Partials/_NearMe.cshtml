@@ -1,0 +1,47 @@
+﻿@using FindMyChair.Models.Meetings;
+@using System;
+@using System.Globalization;
+@using FindMyChair.Types;
+@using FindMyChair.Web.ViewModels;
+@using FindMyChair.Utilities;
+@model NearMeViewModel
+@if (null != Model)
+{
+	if (null != Model.UpcomingMeetingsList && Model.UpcomingMeetingsList.Any())
+	{
+		Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.UpcomingMeetingsList);
+	}
+	if (!string.IsNullOrWhiteSpace(Model.LongitudesAndLattitudesListString))
+	{
+		<div id="map" style="height: 400px;"></div>
+		<script type="text/javascript">
+                var locations = [
+                  @Html.Raw(Model.LongitudesAndLattitudesListString)
+                ];
+
+                var map = new google.maps.Map(document.getElementById('map'), {
+                  zoom: 10,
+                  center: new google.maps.LatLng(-33.92, 151.25),
+                  mapTypeId: google.maps.MapTypeId.ROADMAP
+                });
+
+                var infowindow = new google.maps.InfoWindow();
+
+                var marker, i;
+
+                for (i = 0; i < locations.length; i++) {
+                  marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                    map: map
+                  });
+
+                  google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                    return function() {
+                      infowindow.setContent(locations[i][0]);
+                      infowindow.open(map, marker);
+                    }
+                  })(marker, i));
+                }
+		</script>
+	}
+}

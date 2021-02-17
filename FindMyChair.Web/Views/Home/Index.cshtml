@@ -1,0 +1,43 @@
+﻿@using System;
+@using System.Globalization;
+@using FindMyChair.Types;
+@using FindMyChair.Web.ViewModels;
+@model MeetingsListViewModel
+@{
+	ViewBag.Title = "Home Page";
+}
+<div class="inner-content">
+	@if (null != Model)
+	{
+	<ul class="nav nav-tabs">
+		<li class="active"><a data-toggle="tab" href="#upcoming">Upcommande</a></li>
+		<li><a data-toggle="tab" href="#aa">AA</a></li>
+		<li><a data-toggle="tab" href="#ca">CA</a></li>
+		<li><a data-toggle="tab" href="#daa">DAA</a></li>
+		<li><a data-toggle="tab" href="#na">NA</a></li>
+	</ul>
+	<div class="tab-content">
+		<div id="upcoming" class="tab-pane active">
+			@if (null != Model.NearMeViewModel)
+			{
+				Html.RenderPartial("~/Views/Home/Partials/_NearMe.cshtml", Model.NearMeViewModel);
+			}
+		</div>
+		<div id="aa" class="tab-pane">
+			@if (null != Model.AAMeetingsList && Model.AAMeetingsList.Any())
+			{
+				Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.AAMeetingsList);
+			}
+		</div>
+		<div id="ca" class="tab-pane">
+			CA
+		</div>
+		<div id="daa" class="tab-pane">
+			DAA
+		</div>
+		<div id="na" class="tab-pane">
+			NA
+		</div>
+	</div>
+	}
+</div>
