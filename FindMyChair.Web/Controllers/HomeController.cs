@@ -4,21 +4,22 @@ using FindMyChair.Models.Meetings;
 using FindMyChair.Web.ViewModels;
 using FindMyChair.Client;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Configuration;
-using System;
+using BingMapsRESTToolkit;
+using FindMyChair.Models.Mapping;
 
 namespace FindMyChair.Web.Controllers
 {
     public class HomeController : Controller
     {
         private readonly AAClient _aaClient;
-        private readonly GoogleClient _googleClient;
+        private readonly BingClient _bingClient;
+        private readonly string _bingApiKey;
         public HomeController()
 		{
-            var googleApiKey = ConfigurationManager.AppSettings["GoogleApiKey"];
+            _bingApiKey = ConfigurationManager.AppSettings["BingApiKey"];
+            _bingClient = new BingClient(_bingApiKey);
             _aaClient = new AAClient();
-            _googleClient = new GoogleClient(googleApiKey);
 		}
 
         public async Task<ViewResult> Index()
@@ -30,12 +31,15 @@ namespace FindMyChair.Web.Controllers
             }
             var aaMeetingList = Session["AAMeetingList"] as List<Meeting>;
             model.AAMeetingsList = aaMeetingList;
-			var meetingListViewModel = new NearMeViewModel
+            var meetingListViewModel = new NearMeViewModel
 			{
 				UpcomingMeetingsList = await _aaClient.GetUpcomingMeetingsList(aaMeetingList),
 				LongitudesAndLattitudesListString = "['Sandelsgatan 29', 59.3444559, 18.0896937, 1]"
 			};
-			model.NearMeViewModel = meetingListViewModel;
+            meetingListViewModel.BingApiKey = _bingApiKey;
+            meetingListViewModel.LocationLists = await _bingClient.GetLocations(meetingListViewModel.UpcomingMeetingsList);
+            model.BingApiKey = _bingApiKey;
+            model.NearMeViewModel = meetingListViewModel;
             return View(model);
         }
 
@@ -52,5 +56,21 @@ namespace FindMyChair.Web.Controllers
 
             return View();
         }
+
+        /*
+        public ActionResult GetLocations()
+        {
+            var locations = new List<Location>() {
+                new Location (28.110749, 77),
+                new Location(26.892679, 75),
+                new Location(21.54, 81.84),
+                new Location(15.0, 78.6),
+                new Location (10.401, 79.02),
+                new Location(23.281719, 87.58)
+            };
+
+            return Json(locations, JsonRequestBehavior.AllowGet);
+        }
+        */
     }
 }

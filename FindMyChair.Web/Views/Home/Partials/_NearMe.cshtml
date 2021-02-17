@@ -4,6 +4,7 @@
 @using FindMyChair.Types;
 @using FindMyChair.Web.ViewModels;
 @using FindMyChair.Utilities;
+@using Mapsui;
 @model NearMeViewModel
 @if (null != Model)
 {
@@ -11,37 +12,64 @@
 	{
 		Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.UpcomingMeetingsList);
 	}
-	if (!string.IsNullOrWhiteSpace(Model.LongitudesAndLattitudesListString))
+	if (!string.IsNullOrWhiteSpace(Model.BingApiKey) && null != Model.LocationLists)
 	{
-		<div id="map" style="height: 400px;"></div>
-		<script type="text/javascript">
-                var locations = [
-                  @Html.Raw(Model.LongitudesAndLattitudesListString)
-                ];
+		<div id="map" style="position:relative; height:600px;"></div>
+		<script type='text/javascript'>
 
-                var map = new google.maps.Map(document.getElementById('map'), {
-                  zoom: 10,
-                  center: new google.maps.LatLng(-33.92, 151.25),
-                  mapTypeId: google.maps.MapTypeId.ROADMAP
+            function loadMapScenario() {
+            var map = new Microsoft.Maps.Map(document.getElementById('map'), {
+                credentials: "@Model.BingApiKey",
+                mapTypeId: Microsoft.Maps.MapTypeId.road,
+                zoom: 5
+            });
+
+            // Create the infobox for the pushpin
+            var infobox = null;
+            //declare addMarker function
+            function addMarker(latitude, longitude, title, description, pid)
+            {
+                var marker = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(latitude, longitude), { color: 'green' });
+                infobox = new Microsoft.Maps.Infobox(marker.getLocation(), {
+                    visible : false
                 });
+                marker.metadata = {
+                    id: pid,
+                    title: title,
+                    description: description
+                };
+                Microsoft.Maps.Events.addHandler(marker, 'mouseout', hideInfobox);
+                Microsoft.Maps.Events.addHandler(marker, 'mouseover', showInfobox);
+                infobox.setMap(map);
+                map.entities.push(marker);
+                marker.setOptions({ enableHoverStyle: true });
+            };
 
-                var infowindow = new google.maps.InfoWindow();
-
-                var marker, i;
-
-                for (i = 0; i < locations.length; i++) {
-                  marker = new google.maps.Marker({
-                    position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-                    map: map
-                  });
-
-                  google.maps.event.addListener(marker, 'click', (function(marker, i) {
-                    return function() {
-                      infowindow.setContent(locations[i][0]);
-                      infowindow.open(map, marker);
-                    }
-                  })(marker, i));
+            function showInfobox(e) {
+                if (e.target.metadata) {
+                    infobox.setOptions({
+                        location: e.target.getLocation(),
+                        title: e.target.metadata.title,
+                        description: e.target.metadata.description,
+                        visible: true
+                    });
                 }
-		</script>
+            }
+
+            function hideInfobox(e) {
+                infobox.setOptions({ visible: false });
+            }
+
+            //add markers to map
+            @if (Model.LocationLists.LocationList != null)
+            {
+                foreach (var item in Model.LocationLists.LocationList)
+                {
+                    @:addMarker(@item.Latitude, @item.Longitude, '@Html.Raw(item.Title)', '@Html.Raw(item.Description)', @item.LocationId);
+                }
+            }
+        }
+	</script>
+	<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?branch=release&callback=loadMapScenario' async defer></script>
 	}
 }

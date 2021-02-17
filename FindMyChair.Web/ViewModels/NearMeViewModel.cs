@@ -1,4 +1,4 @@
-﻿using FindMyChair.Models.Google;
+﻿using FindMyChair.Models.Mapping;
 using FindMyChair.Models.Meetings;
 using System.Collections.Generic;
 
@@ -8,6 +8,7 @@ namespace FindMyChair.Web.ViewModels
 	{
 		public List<Meeting> UpcomingMeetingsList { get; set; }
 		public string LongitudesAndLattitudesListString { get; set; }
-		public List<LongitudeAndLatitude> LongitudesAndLattitudesList { get; set; }
+		public string BingApiKey { get; set; }
+		public LocationLists LocationLists { get; set; }
 	}
 }

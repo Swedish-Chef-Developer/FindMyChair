@@ -1,5 +1,4 @@
 ﻿using FindMyChair.Models.Meetings;
-using FindMyChair.Models.Google;
 using System.Collections.Generic;
 
 namespace FindMyChair.Web.ViewModels
@@ -9,6 +8,6 @@ namespace FindMyChair.Web.ViewModels
         public List<Meeting>  AAMeetingsList { get; set; }
         public NearMeViewModel NearMeViewModel { get; set; }
         public string LongitudesAndLattitudesListString { get; set; }
-        public List<LongitudeAndLatitude> LongitudesAndLattitudesList { get; set; }
+        public string BingApiKey { get; set; }
     }
 }

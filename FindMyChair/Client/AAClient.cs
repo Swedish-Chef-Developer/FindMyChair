@@ -32,29 +32,11 @@ namespace FindMyChair.Client
 
 		public int GetCurrentDay()
 		{
-			return SetMeetingDay();
+			return SetCurrentDay();
 		}
 
 		private async Task<List<Meeting>> SetMeetingsList()
 		{
-			using (var fileStream = File.OpenRead("path/to/file.osm.pbf"))
-			{
-				// create source stream.
-				var source = new PBFOsmStreamSource(fileStream);
-
-				// filter all powerlines and keep all nodes.
-				var filtered = from osmGeo in source
-							   where osmGeo.Type == OsmSharp.OsmGeoType.Node ||
-								(osmGeo.Type == OsmSharp.OsmGeoType.Way && osmGeo.Tags != null && osmGeo.Tags.Contains("power", "line"))
-							   select osmGeo;
-
-				// convert to complete stream.
-				// WARNING: nodes that are partof powerlines will be kept in-memory.
-				//          it's important to filter only the objects you need **before** 
-				//          you convert to a complete stream otherwise all objects will 
-				//          be kept in-memory.
-				var complete = filtered.ToComplete();
-			}
 			return Castings.ToList(_aaScraper.MeetingList());
 		}
 
@@ -64,7 +46,7 @@ namespace FindMyChair.Client
 			{
 				var currentTimeString = string.Format("{0}:{1}", DateTime.Now.Hour, DateTime.Now.Minute);
 				var currentTimeSpan = TimeSpan.Parse(currentTimeString);
-				var curentDay = SetMeetingDay();
+				var curentDay = SetCurrentDay();
 				var upcomingList = new List<Meeting>();
 				foreach (var meeting in meetingList)
 				{
@@ -87,7 +69,7 @@ namespace FindMyChair.Client
 			return meetingList;
 		}
 
-		private int SetMeetingDay()
+		private int SetCurrentDay()
 		{
 			var dayOfWeek = DateTime.Now.DayOfWeek.ToString();
 			Enum.TryParse(dayOfWeek, out WeekdayNames weekDay);
