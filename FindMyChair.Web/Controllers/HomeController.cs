@@ -56,21 +56,5 @@ namespace FindMyChair.Web.Controllers
 
             return View();
         }
-
-        /*
-        public ActionResult GetLocations()
-        {
-            var locations = new List<Location>() {
-                new Location (28.110749, 77),
-                new Location(26.892679, 75),
-                new Location(21.54, 81.84),
-                new Location(15.0, 78.6),
-                new Location (10.401, 79.02),
-                new Location(23.281719, 87.58)
-            };
-
-            return Json(locations, JsonRequestBehavior.AllowGet);
-        }
-        */
     }
 }
