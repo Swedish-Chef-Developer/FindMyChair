@@ -7,7 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 
 namespace FindMyChair.Client
 {
@@ -77,11 +79,8 @@ namespace FindMyChair.Client
 		private IEnumerable<Meeting> SortedOnStartTime(List<Meeting> meetings)
 		{
 			var today = SetCurrentDay();
-			foreach (var meeting in meetings)
-			{
-
-			}
 			var enumMeetings = meetings.OrderByDescending(m => m.DayAndTime[today].StartTime.Ticks).Where(m => m.DayAndTime[today].StartTime.Ticks > 0);
+			var g = meetings.OrderByDescending(m => m.DayAndTime.Any(t => t.StartTime.Ticks >= DateTime.Now.TimeOfDay.Ticks));
 			return meetings;
 		}
 	}

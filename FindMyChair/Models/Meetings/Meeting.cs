@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace FindMyChair.Models.Meetings
 {
@@ -21,6 +22,7 @@ namespace FindMyChair.Models.Meetings
         public string AdditionalInformationHtmlString { get; set; }
         public List<string> NotesList { get; set; }
         public List<string> AdditionalInfo { get; set; }
+        [DisplayName("Day And Time")]
         public List<MeetingSpecific> DayAndTime { get; set; }
         public Address Address { get; set; }
     }
