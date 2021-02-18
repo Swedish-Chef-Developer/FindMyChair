@@ -10,14 +10,14 @@
 	@if (null != Model)
 	{
 	<ul class="nav nav-tabs">
-		<li class="active"><a data-toggle="tab" href="#upcoming">Upcommande</a></li>
+		<li class="active"><a data-toggle="tab" href="#today">Today</a></li>
 		<li><a data-toggle="tab" href="#aa">AA</a></li>
 		<li><a data-toggle="tab" href="#ca">CA</a></li>
 		<li><a data-toggle="tab" href="#daa">DAA</a></li>
 		<li><a data-toggle="tab" href="#na">NA</a></li>
 	</ul>
 	<div class="tab-content">
-		<div id="upcoming" class="tab-pane active">
+		<div id="today" class="tab-pane active">
 			@if (null != Model.NearMeViewModel)
 			{
 				Html.RenderPartial("~/Views/Home/Partials/_NearMe.cshtml", Model.NearMeViewModel);

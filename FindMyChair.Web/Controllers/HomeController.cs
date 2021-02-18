@@ -31,13 +31,20 @@ namespace FindMyChair.Web.Controllers
             }
             var aaMeetingList = Session["AAMeetingList"] as List<Meeting>;
             model.AAMeetingsList = aaMeetingList;
+            if (null == Session["AATodaysMeetingList"])
+            {
+                Session["AATodaysMeetingList"] = await _aaClient.GetUpcomingMeetingsList(aaMeetingList); 
+            }
             var meetingListViewModel = new NearMeViewModel
-			{
-				UpcomingMeetingsList = await _aaClient.GetUpcomingMeetingsList(aaMeetingList),
-				LongitudesAndLattitudesListString = "['Sandelsgatan 29', 59.3444559, 18.0896937, 1]"
-			};
+            {
+                UpcomingMeetingsList = Session["AATodaysMeetingList"] as List<Meeting>
+            };
             meetingListViewModel.BingApiKey = _bingApiKey;
-            meetingListViewModel.LocationLists = await _bingClient.GetLocations(meetingListViewModel.UpcomingMeetingsList);
+            if (null == Session["AALocationLists"])
+            {
+                Session["AALocationLists"] = await _bingClient.GetLocations(meetingListViewModel.UpcomingMeetingsList);
+            }
+            meetingListViewModel.LocationLists = Session["AALocationLists"] as LocationLists;
             model.BingApiKey = _bingApiKey;
             model.NearMeViewModel = meetingListViewModel;
             return View(model);

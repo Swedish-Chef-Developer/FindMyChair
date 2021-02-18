@@ -11,6 +11,7 @@
 	var scraperUtility = new ScraperUtilities();
 	var aaClient = new AAClient();
 	var today = aaClient.GetCurrentDay();
+	var rowCounter = 0;
 }
 @if (null != Model)
 {
@@ -136,9 +137,9 @@
 						<table class="meeting-table">
 							<thead>
 								<tr>
-									@foreach (var schedule in meeting.DayAndTime.Values.FirstOrDefault())
+									@for (var d = 0; d < 7; d++)
 									{
-										var dayName = Enum.GetName(typeof(WeekdayNamesSV), schedule.Key);
+										var dayName = Enum.GetName(typeof(WeekdayNamesSV), meeting.DayAndTime[d].MeetingDay);
 										<th>
 											@dayName
 										</th>
@@ -146,40 +147,44 @@
 								</tr>
 							</thead>
 							<tbody>
-								@foreach (var dayRows in meeting.DayAndTime.Values)
+								@for (var i = 0; i < meeting.DayAndTime.Count; i++)
 								{
-									<tr>
-										@foreach (var meetingSpecific in dayRows.Values)
+									if (i == 0 || i % 6 == 0)
+									{
+										Html.Raw("<tr>");
+									}
+									var dateTime = new DateTime(Math.Abs(meeting.DayAndTime[i].StartTime.Ticks));
+									var formattedTime = dateTime.ToString("HH:mm", CultureInfo.CurrentCulture);
+									var todayClass = string.Empty;
+									if (dateTime.Ticks > 0)
+									{
+										if (meeting.DayAndTime[i].MeetingDay == today
+												&& dateTime.Ticks > DateTime.Now.TimeOfDay.Ticks)
 										{
-											var dateTime = new DateTime(Math.Abs(meetingSpecific.StartTime.Ticks));
-											var formattedTime = dateTime.ToString("HH:mm", CultureInfo.CurrentCulture);
-											var todayClass = string.Empty;
-											if (dateTime.Ticks > 0)
-											{
-												if (meetingSpecific.MeetingDay == today
-														&& dateTime.Ticks > DateTime.Now.TimeOfDay.Ticks)
-												{
-													todayClass = "meeting-today";
-												}
-											}
-											<td@(timeCounter > 0 && dateTime.Ticks > 0 ? Html.Raw(" class='additional-time'") : Html.Raw("")) style="background-color: @scraperUtility.GetMeetingTypesColorAA(meetingSpecific.MeetingType);">
-												@if (dateTime.Ticks > 0)
-												{
-													<span class="meeting-table-time @todayClass">@formattedTime</span>
-												}
-												else
-												{
-													<span class="meeting-table-time">&nbsp;</span>
-												}
-												</td>
-												formattedTime = string.Empty;
-											}
-								</tr>
-								timeCounter++;
-							}
-							</tbody>
-						</table>
-					}
+											todayClass = "meeting-today";
+										}
+									}
+									<td@(timeCounter > 0 && dateTime.Ticks > 0 ? Html.Raw(" class='additional-time'") : Html.Raw("")) style="background-color: @scraperUtility.GetMeetingTypesColorAA(meeting.DayAndTime[i].MeetingType);">
+										@if (dateTime.Ticks > 0)
+										{
+											<span class="meeting-table-time @todayClass">@formattedTime</span>
+										}
+										else
+										{
+											<span class="meeting-table-time">&nbsp;</span>
+										}
+										</td>
+										formattedTime = string.Empty;
+										if (i % 6 == 5)
+										{
+											Html.Raw("</tr>");
+										rowCounter++;
+										}
+										timeCounter++;
+									}
+						</tbody>
+					</table>
+				}
 				</div>
 			</div>
 		}

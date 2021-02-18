@@ -5,6 +5,11 @@ using System.Threading.Tasks;
 using BingMapsRESTToolkit;
 using System.Linq;
 using FindMyChair.Models.Mapping;
+using System.Globalization;
+using FindMyChair.Client;
+using FindMyChair.Types;
+using FindMyChair.Utilities;
+using System.Text;
 
 namespace FindMyChair.Client
 {
@@ -31,14 +36,25 @@ namespace FindMyChair.Client
 		{
 			var returnList = new LocationLists();
 			var workList = new List<Locations>();
+			var aaClient = new AAClient();
+			var utilities = new TextUtility();
+			var today = aaClient.GetCurrentDay();
 			for (var i = 0; i <  meetings.Count; i++)
 			{
 				if (string.IsNullOrWhiteSpace(meetings[i].Address.Street) || string.IsNullOrWhiteSpace(meetings[i].Address.City)) continue;
 				var address = string.Format("{0}, {1}", meetings[i].Address.Street, meetings[i].Address.City);
+				var time = meetings[i].DayAndTime.Where(m => m.MeetingDay == today)
+					.Select(m => m.StartTime)
+					.FirstOrDefault();
+				DateTime dateTime = new DateTime(Math.Abs(time.Ticks));
+				var type = meetings[i].DayAndTime.Select(m => m.MeetingType).FirstOrDefault();
+				var startTime = dateTime.ToString("HH:mm", CultureInfo.CurrentCulture);
+				var meetingType = utilities.GetEnumDescription(type);
+				var description = string.Format("<div>{0}</div><div>{1} {2}</div><div>{3}</div>", address, startTime, meetingType, meetings[i].Place);
 				workList.Add(await GetLonAndLatFromAddress(address,
 					meetings[i].GroupName,
 					i,
-					meetings[i].Place));
+					description));
 			}
 			returnList.LocationList = workList;
 			return returnList;

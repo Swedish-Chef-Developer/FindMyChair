@@ -25,7 +25,7 @@ namespace FindMyChair.Client
 			return await SetMeetingsList();
 		}
 
-		public async Task<List<Meeting>> GetUpcomingMeetingsList(List<Meeting> meetingList)
+		public async Task<IEnumerable<Meeting>> GetUpcomingMeetingsList(List<Meeting> meetingList)
 		{
 			return await SetUpcomingMeetingsList(meetingList);
 		}
@@ -40,7 +40,7 @@ namespace FindMyChair.Client
 			return Castings.ToList(_aaScraper.MeetingList());
 		}
 
-		private async Task<List<Meeting>> SetUpcomingMeetingsList(List<Meeting> meetingList)
+		private async Task<IEnumerable<Meeting>> SetUpcomingMeetingsList(List<Meeting> meetingList)
 		{
 			if (null != meetingList && meetingList.Any())
 			{
@@ -50,21 +50,18 @@ namespace FindMyChair.Client
 				var upcomingList = new List<Meeting>();
 				foreach (var meeting in meetingList)
 				{
-					foreach (var meetingDay in meeting.DayAndTime.Values)
+					foreach (var meetingDay in meeting.DayAndTime.OrderByDescending(m => m.StartTime))
 					{
-						foreach (var meetings in meetingDay.Values)
+						if (!upcomingList.Contains(meeting)
+							&& meetingDay.MeetingDay == curentDay
+							&& meetingDay.StartTime.Ticks >= currentTimeSpan.Ticks)
 						{
-							if (!upcomingList.Contains(meeting) 
-								&& meetings.MeetingDay == curentDay 
-								&& meetings.StartTime > currentTimeSpan)
-							{
-								upcomingList.Add(meeting);
-								continue;
-							}
+							upcomingList.Add(meeting);
+							continue;
 						}
 					}
 				}
-				return upcomingList;
+				return SortedOnStartTime(upcomingList);
 			}
 			return meetingList;
 		}
@@ -76,5 +73,18 @@ namespace FindMyChair.Client
 			var dayInt = (int)Enum.Parse(typeof(WeekdayNames), weekDay.ToString());
 			return dayInt;
 		}
+
+		private IEnumerable<Meeting> SortedOnStartTime(List<Meeting> meetings)
+		{
+			var today = SetCurrentDay();
+			foreach (var meeting in meetings)
+			{
+
+			}
+			var enumMeetings = meetings.OrderByDescending(m => m.DayAndTime[today].StartTime.Ticks).Where(m => m.DayAndTime[today].StartTime.Ticks > 0);
+			return meetings;
+		}
 	}
+
+
 }

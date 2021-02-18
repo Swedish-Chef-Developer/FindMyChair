@@ -6,7 +6,7 @@ namespace FindMyChair.Models.Meetings
     {
         public Meeting()
         {
-            DayAndTime = new Dictionary<int, Dictionary<int, MeetingSpecific>>();
+            DayAndTime = new List<MeetingSpecific>();
             Address = new Address();
         }
         public int Id { get; set; }
@@ -21,7 +21,7 @@ namespace FindMyChair.Models.Meetings
         public string AdditionalInformationHtmlString { get; set; }
         public List<string> NotesList { get; set; }
         public List<string> AdditionalInfo { get; set; }
-        public Dictionary<int, Dictionary<int, MeetingSpecific>> DayAndTime { get; set; }
+        public List<MeetingSpecific> DayAndTime { get; set; }
         public Address Address { get; set; }
     }
 }

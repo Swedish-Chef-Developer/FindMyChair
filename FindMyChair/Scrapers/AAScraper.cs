@@ -112,7 +112,7 @@ namespace FindMyChair.Scrapers
 								&& n.HasAttributes
 							   && null != n.Attributes["class"]
 							   && n.ParentNode.HasAttributes
-							   && null !=  n.ParentNode.Attributes["class"]
+							   && null != n.ParentNode.Attributes["class"]
 							   && n.ParentNode.Attributes["class"].Value.Contains("field-type-text")).FirstOrDefault();
 				try
 				{
@@ -168,10 +168,10 @@ namespace FindMyChair.Scrapers
 					{
 						if (node.ParentNode.HasAttributes &&
 							null != node.ParentNode.Attributes &&
-							null != node.ParentNode.ParentNode.Attributes["class"] && 
-							node.ParentNode.ParentNode.Attributes["class"].Value.Contains("field field-name-field-note") && 
+							null != node.ParentNode.ParentNode.Attributes["class"] &&
+							node.ParentNode.ParentNode.Attributes["class"].Value.Contains("field field-name-field-note") &&
 							node.HasAttributes &&
-							null != node.Attributes["class"] && 
+							null != node.Attributes["class"] &&
 							node.Attributes["class"].Value.Contains("field-label"))
 						{
 							break;
@@ -235,7 +235,7 @@ namespace FindMyChair.Scrapers
 						}
 						if (!string.IsNullOrWhiteSpace(node.InnerText.Trim()) &&
 							!additionalInformation.Contains(node.InnerText.Trim()) &&
-							!additionalInformation.Contains(node.InnerHtml.Trim()) && 
+							!additionalInformation.Contains(node.InnerHtml.Trim()) &&
 							!skipNext)
 						{
 							additionalInformation.Add(node.InnerText.Trim());
@@ -254,12 +254,11 @@ namespace FindMyChair.Scrapers
 				meeting.AdditionalInformationHtmlString = stringBuilder.ToString();
 				var tableBody = meetingNode.SelectSingleNode(".//table[contains(@class, 'meetings-table')]/tbody");
 				var tableBodyRows = tableBody.SelectNodes(".//tr");
-				var weekDay = 0;
 				for (var r = 0; r < tableBodyRows.Count; r++)
 				{
 					var tableBodyCells = tableBodyRows[r].SelectNodes(".//td");
 					if (null == tableBodyCells) continue;
-					var dayAndTimes = new Dictionary<int, MeetingSpecific>();
+					var dayAndTimes = new List<MeetingSpecific>();
 					for (var dt = 0; dt < tableBodyCells.Count; dt++)
 					{
 						var meetingSpecific = new MeetingSpecific();
@@ -277,35 +276,27 @@ namespace FindMyChair.Scrapers
 						// width: 14.28571428571429%; background-color: #90b6c8;
 						style.Value = tdStyles;
 						style.Remove("width");
-						var styleColor = (null != style 
+						var styleColor = (null != style
 							&& null != style.Value
 							&& !string.IsNullOrWhiteSpace(style.Value))
 							? style.Value.ToLower().Replace("background-color:", string.Empty)
 							.Replace(";", string.Empty)
 							.Trim()
-							: string.Empty;					
+							: string.Empty;
+						var meetingType = scraperUtility.GetMeetingTypesAA(styleColor);
 						meetingSpecific.Id = dt;
+						meetingSpecific.Row = r;
 						meetingSpecific.StartTime = time;
 						meetingSpecific.MeetingDay = dt;
-						meetingSpecific.MeetingType = scraperUtility.GetMeetingTypesAA(styleColor);
-						if (dayAndTimes.ContainsKey(dt))
+						meetingSpecific.MeetingType = meetingType;
+						if (dayAndTimes.Contains(meetingSpecific)) continue;
+						dayAndTimes.Add(meetingSpecific);
+						if (!meeting.DayAndTime.Contains(meetingSpecific))
 						{
-							dayAndTimes[dt] = meetingSpecific;
+							meeting.DayAndTime = dayAndTimes;
 						}
-						else
-						{
-							dayAndTimes.Add(dt, meetingSpecific);
-						}
-						if (weekDay == 6) weekDay = 0;
 					}
-					if (meeting.DayAndTime.ContainsKey(r))
-					{
-						meeting.DayAndTime[r] = dayAndTimes;
-					}
-					else
-					{
-						meeting.DayAndTime.Add(r, dayAndTimes);
-					}
+
 				}
 
 				meetingList.Add(meeting);

@@ -258,3 +258,15 @@ span.expand-text {
 .meeting-additional-info  {
 	margin-left: 10px;
 }
+
+.MicrosoftMap 
+.Infobox 
+.infobox-info {
+	padding-top: 1px;
+}
+
+.MicrosoftMap 
+.Infobox 
+.infobox-title {
+	padding-bottom: 1px;
+}
