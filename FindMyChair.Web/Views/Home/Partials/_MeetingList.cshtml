@@ -4,7 +4,6 @@
 @using FindMyChair.Types;
 @using FindMyChair.Client;
 @using FindMyChair.Utilities;
-@using System.Text;
 @model List<Meeting>
 @{
 	var timeCounter = 0;
@@ -15,7 +14,7 @@
 }
 @if (null != Model)
 {
-	<section class="inner-content">
+	<section class="inner-content" id="list-content">
 		@foreach (var meeting in Model)
 		{
 			var counter = 0;
@@ -134,6 +133,12 @@
 					@if (null != meeting.DayAndTime && meeting.DayAndTime.Any())
 					{
 						timeCounter = 0;
+					<div class="headline">
+						<h4 class="schedule-title">Ordinarie AA-möten</h4>
+						<div class="flags">
+							<span class="flag flag-@meeting.Language"></span>
+						</div>
+					</div>
 						<table class="meeting-table">
 							<thead>
 								<tr>
@@ -149,9 +154,9 @@
 							<tbody>
 								@for (var i = 0; i < meeting.DayAndTime.Count; i++)
 								{
-									if (i == 0 || i % 6 == 0)
+									if (i % 7 == 0)
 									{
-										Html.Raw("<tr>");
+										@Html.Raw("<tr>");
 									}
 									var dateTime = new DateTime(Math.Abs(meeting.DayAndTime[i].StartTime.Ticks));
 									var formattedTime = dateTime.ToString("HH:mm", CultureInfo.CurrentCulture);
@@ -159,7 +164,7 @@
 									if (dateTime.Ticks > 0)
 									{
 										if (meeting.DayAndTime[i].MeetingDay == today
-												&& dateTime.Ticks > DateTime.Now.TimeOfDay.Ticks)
+													&& dateTime.Ticks > DateTime.Now.TimeOfDay.Ticks)
 										{
 											todayClass = "meeting-today";
 										}
@@ -175,10 +180,10 @@
 										}
 										</td>
 										formattedTime = string.Empty;
-										if (i % 6 == 5)
+										if (i != 0 && i % 7 == 6)
 										{
-											Html.Raw("</tr>");
-										rowCounter++;
+											@Html.Raw("</tr>");
+											rowCounter++;
 										}
 										timeCounter++;
 									}

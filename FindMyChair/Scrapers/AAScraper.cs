@@ -158,7 +158,6 @@ namespace FindMyChair.Scrapers
 											&& null != n.Attributes["class"]
 											&& n.Attributes["class"].Value.Contains("even"));
 				}
-
 				IEnumerable<HtmlNode> additionalInfoNodes = new List<HtmlNode>();
 				var counter = 0;
 				var skipNext = false;
@@ -252,13 +251,23 @@ namespace FindMyChair.Scrapers
 					stringBuilder.AppendFormat("<p>{0}</p>", node).AppendLine();
 				}
 				meeting.AdditionalInformationHtmlString = stringBuilder.ToString();
+				var flagNode = meetingNode.SelectSingleNode(".//div[contains(@class, 'meeting-schedule')]//div[contains(@class, 'flag')]");
 				var tableBody = meetingNode.SelectSingleNode(".//table[contains(@class, 'meetings-table')]/tbody");
+				var languageNode = flagNode.ChildNodes.Where(n => null != n.Attributes && n.HasAttributes
+					&& null != n.Attributes["class"]
+					&& n.Attributes["class"].Value.Contains("flag-")).SingleOrDefault();
+				if (null != languageNode)
+				{
+					var flagArray = languageNode.Attributes["class"].Value.Split(new char[] { ' ', '.' });
+					var flag = flagArray[flagArray.Length - 1].Replace("flag-", "");
+					meeting.Language = flag;
+				}
 				var tableBodyRows = tableBody.SelectNodes(".//tr");
+				var dayAndTimes = new List<MeetingSpecific>();
 				for (var r = 0; r < tableBodyRows.Count; r++)
 				{
 					var tableBodyCells = tableBodyRows[r].SelectNodes(".//td");
 					if (null == tableBodyCells) continue;
-					var dayAndTimes = new List<MeetingSpecific>();
 					for (var dt = 0; dt < tableBodyCells.Count; dt++)
 					{
 						var meetingSpecific = new MeetingSpecific();
@@ -273,7 +282,6 @@ namespace FindMyChair.Scrapers
 							&& !string.IsNullOrWhiteSpace(tableBodyCells[dt].Attributes["style"].Value.Trim()))
 							? tableBodyCells[dt].Attributes["style"].Value.Trim()
 							: string.Empty;
-						// width: 14.28571428571429%; background-color: #90b6c8;
 						style.Value = tdStyles;
 						style.Remove("width");
 						var styleColor = (null != style
@@ -284,17 +292,15 @@ namespace FindMyChair.Scrapers
 							.Trim()
 							: string.Empty;
 						var meetingType = scraperUtility.GetMeetingTypesAA(styleColor);
-						meetingSpecific.Id = dt;
+						var id = -1;
+						int.TryParse((r.ToString() + dt.ToString()), out id);
+						meetingSpecific.Id = id;
 						meetingSpecific.Row = r;
 						meetingSpecific.StartTime = time;
 						meetingSpecific.MeetingDay = dt;
 						meetingSpecific.MeetingType = meetingType;
-						if (dayAndTimes.Contains(meetingSpecific)) continue;
 						dayAndTimes.Add(meetingSpecific);
-						if (!meeting.DayAndTime.Contains(meetingSpecific))
-						{
-							meeting.DayAndTime = dayAndTimes;
-						}
+						meeting.DayAndTime = dayAndTimes;
 					}
 
 				}

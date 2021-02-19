@@ -1,0 +1,47 @@
+﻿@using FindMyChair.Web.Models.Meetings;
+@model FilterSorting
+<div class="meeting-filter-wrapper">
+	<div class="meeting-filter-heading">
+		<h4>Filter och Sortering</h4>
+	</div>
+	<form method="post" action='@Url.Action("AASortFilter", "Home")' id="filtersortform">
+		<div class="meeting-filter">
+			<div class='col-md-12 form-group row'>
+				<div class="col-md-12">
+					<label for="test">Välj stad/städer</label>
+					<span class="selec-info">(för multi håll ned Ctrl/Command och klicka på val)</span>
+				</div>
+				<div class="col-md-5">
+					<select name="cities" class="form-control" multiple>
+						<option></option>
+						@if (null != Model && null != Model.CityList)
+						{
+							foreach (var city in Model.CityList)
+							{
+								if (char.IsDigit(city.ToString()[0])) { continue; }
+								<option value="@city.Trim()">@city.Trim()</option>
+							}
+						}
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="meeting-sort">
+			<div class='col-md-12 form-group row'>
+				<div class="col-md-12"><label for="test">Sortera</label></div>
+				<div class="col-md-5">
+					<select name="sorting" class="form-control">
+						<option></option>
+						<option value="acsending-name">Namn A-Ö</option>
+						<option value="decsending-name">Namn Ö-A</option>
+						<option value="time-ascending">Start tid närmast</option>
+						<option value="time-descending">Start tid senast</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="meeting-filter-footer">
+			<button class="btn btn-secondary my-2 my-sm-0" type="submit" id="filtersort">Visa Resultat</button>
+		</div>
+	</form>
+</div>

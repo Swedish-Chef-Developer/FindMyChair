@@ -1,7 +1,7 @@
 ﻿@using System;
 @using System.Globalization;
-@using FindMyChair.Types;
-@using FindMyChair.Web.ViewModels;
+@using FindMyChair.Web.Models.Meetings;
+@using FindMyChair.Web.ViewModels.Meetings;
 @model MeetingsListViewModel
 @{
 	ViewBag.Title = "Home Page";
@@ -26,6 +26,7 @@
 		<div id="aa" class="tab-pane">
 			@if (null != Model.AAMeetingsList && Model.AAMeetingsList.Any())
 			{
+				Html.RenderPartial("~/Views/Shared/Partials/_ListingsFilterView.cshtml", Model.FilterSorting);
 				Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.AAMeetingsList);
 			}
 		</div>
@@ -41,3 +42,22 @@
 	</div>
 	}
 </div>
+<script>
+$(document).ready(function () {
+	$('#filtersortform').submit(function () {
+		$.ajax({
+			type: this.method,
+			url: this.action,
+			data: $(this).serialize(),
+			dataType: 'html',
+			success: function (response) {
+				$('#aa #list-content').html(response);
+			},
+			error: function (error) {
+				console.log(error);
+			}
+		});
+		return false;
+	});
+});
+</script>

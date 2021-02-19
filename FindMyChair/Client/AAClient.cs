@@ -5,6 +5,7 @@ using FindMyChair.Utilities;
 using OsmSharp.Streams;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -30,6 +31,11 @@ namespace FindMyChair.Client
 		public async Task<IEnumerable<Meeting>> GetUpcomingMeetingsList(List<Meeting> meetingList)
 		{
 			return await SetUpcomingMeetingsList(meetingList);
+		}
+
+		public async Task<List<string>> GetCities(List<Meeting> meetingList)
+		{
+			return await SetCities(meetingList);
 		}
 
 		public int GetCurrentDay()
@@ -63,7 +69,7 @@ namespace FindMyChair.Client
 						}
 					}
 				}
-				return SortedOnStartTime(upcomingList);
+				return Castings.ToList(SortedOnStartTime(upcomingList));
 			}
 			return meetingList;
 		}
@@ -76,12 +82,27 @@ namespace FindMyChair.Client
 			return dayInt;
 		}
 
+		private async Task<List<string>> SetCities(List<Meeting> meetingList)
+		{
+			var cities = new List<string>();
+			var culture = new CultureInfo("sv-SE");
+			cities = Castings.ToList(meetingList.Select(c => c.Address.City.Trim())
+				.Where(s => s.Trim() != "")
+				.Where(m => m.Any(m => char.IsUpper(m.ToString()[0])))
+				.Distinct()
+				.OrderBy(s => s, StringComparer.Create(culture, false)));
+			return cities;
+		}
+
 		private IEnumerable<Meeting> SortedOnStartTime(List<Meeting> meetings)
 		{
 			var today = SetCurrentDay();
-			var enumMeetings = meetings.OrderByDescending(m => m.DayAndTime[today].StartTime.Ticks).Where(m => m.DayAndTime[today].StartTime.Ticks > 0);
-			var g = meetings.OrderByDescending(m => m.DayAndTime.Any(t => t.StartTime.Ticks >= DateTime.Now.TimeOfDay.Ticks));
-			return meetings;
+			var sortedList = from meeting in meetings
+					from daytime in meeting.DayAndTime
+					where (daytime.MeetingDay == today)  && (daytime.StartTime.Ticks >= DateTime.Now.TimeOfDay.Ticks)
+					orderby daytime.StartTime.Ticks
+					select meeting;
+			return sortedList;
 		}
 	}
 
