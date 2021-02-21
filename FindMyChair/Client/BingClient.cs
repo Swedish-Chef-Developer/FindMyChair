@@ -74,7 +74,7 @@ namespace FindMyChair.Client
 				var toolkitLocation = (result?.ResourceSets?.FirstOrDefault())
 						?.Resources?.FirstOrDefault()
 						as Location;
-				if (null == toolkitLocation.Point || toolkitLocation.Point.Coordinates.Length <= 0) return location;
+				if (null != toolkitLocation && null == toolkitLocation.Point || toolkitLocation.Point.Coordinates.Length <= 0) return location;
 				var latitude = toolkitLocation.Point.Coordinates[0];
 				var longitude = toolkitLocation.Point.Coordinates[1];
 				location.Longitude = longitude;

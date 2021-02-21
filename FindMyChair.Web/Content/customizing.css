@@ -312,7 +312,8 @@ span.flag-en {
 	background: #c1c1c1;
 	width: 100%;
 	border: 1px solid #000;
-	border-radius: 25px;
+	border-top-left-radius: 25px;
+	border-bottom-left-radius: 25px;
 	margin: 10px 0;
 	display: inline-block;
 	padding: 10px;
@@ -325,19 +326,89 @@ span.flag-en {
 
 	.meeting-filter-wrapper
 	.meeting-filter {
-		width: 50%;
 		float: left;
 	}
 
 	.meeting-filter-wrapper
 	.meeting-sort {
-		width: 50%;
 		float: right;
 	}
 
-.selec-info {
+.select-info {
 	font-size: 0.8em;
 	font-style: italic;
 	display: block;
 	margin: -3px 0px 3px 0px;
+}
+
+.select-control {
+	border-radius: 8px;
+}
+
+.meeting-filter-wrapper
+.meeting-filter-footer {
+	width: 100%;
+	position: relative;
+}
+
+.meeting-filter-wrapper
+.meeting-filter-footer 
+button {
+}
+
+.no-result {
+	margin: 20px;
+	font-size: 1.5em;
+}
+
+.checkbox .cr {
+	position: relative;
+	display: inline-block;
+	border: 1px solid #a9a9a9;
+	border-radius: .25em;
+	width: 1.3em;
+	height: 1.3em;
+	float: left;
+	margin-right: .5em;
+}
+
+	.checkbox .cr .cr-icon {
+		position: absolute;
+		font-size: .8em;
+		line-height: 0;
+		top: 50%;
+		left: 15%;
+	}
+
+.checkbox 
+label 
+input[type="checkbox"] {
+	display: none;
+}
+
+	.checkbox 
+	label 
+	input[type="checkbox"] + 
+	.cr > .cr-icon {
+		opacity: 0;
+	}
+
+	.checkbox 
+	label 
+	input[type="checkbox"]:checked + .cr > .cr-icon {
+		opacity: 1;
+	}
+
+	.checkbox 
+	label 
+	input[type="checkbox"]:disabled + .cr {
+		opacity: .5;
+	}
+
+.checkbox-inline {
+	display: inline-block;
+}
+
+.checkbox-right {
+	float: right
 }

@@ -11,6 +11,7 @@
 	var aaClient = new AAClient();
 	var today = aaClient.GetCurrentDay();
 	var rowCounter = 0;
+	var textUtility = new TextUtility();
 }
 @if (null != Model)
 {
@@ -133,12 +134,12 @@
 					@if (null != meeting.DayAndTime && meeting.DayAndTime.Any())
 					{
 						timeCounter = 0;
-					<div class="headline">
-						<h4 class="schedule-title">Ordinarie AA-möten</h4>
-						<div class="flags">
-							<span class="flag flag-@meeting.Language"></span>
+						<div class="headline">
+							<h4 class="schedule-title">Ordinarie AA-möten</h4>
+							<div class="flags">
+								<span class="flag flag-@meeting.Language"></span>
+							</div>
 						</div>
-					</div>
 						<table class="meeting-table">
 							<thead>
 								<tr>
@@ -159,7 +160,7 @@
 										@Html.Raw("<tr>");
 									}
 									var dateTime = new DateTime(Math.Abs(meeting.DayAndTime[i].StartTime.Ticks));
-									var formattedTime = dateTime.ToString("HH:mm", CultureInfo.CurrentCulture);
+									var formattedTime = textUtility.FormatTimeSpan(meeting.DayAndTime[i].StartTime);
 									var todayClass = string.Empty;
 									if (dateTime.Ticks > 0)
 									{

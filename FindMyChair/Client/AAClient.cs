@@ -38,6 +38,16 @@ namespace FindMyChair.Client
 			return await SetCities(meetingList);
 		}
 
+		public async Task<List<MeetingTypes>> GetMeetingTypes(List<Meeting> meetingList)
+		{
+			return await SetMeetingTpes(meetingList);
+		}
+
+		public async Task<IEnumerable<TimeSpan>> GetTimes(List<Meeting> meetingList)
+		{
+			return await SetTimes(meetingList);
+		}
+
 		public int GetCurrentDay()
 		{
 			return SetCurrentDay();
@@ -92,6 +102,21 @@ namespace FindMyChair.Client
 				.Distinct()
 				.OrderBy(s => s, StringComparer.Create(culture, false)));
 			return cities;
+		}
+
+		private async Task<List<MeetingTypes>> SetMeetingTpes(List<Meeting> meetingList)
+		{
+			return Castings.ToList(Enum.GetValues(typeof(MeetingTypes)).Cast<MeetingTypes>());
+		}
+
+		private async Task<IEnumerable<TimeSpan>> SetTimes(List<Meeting> meetingList)
+		{
+			var times = meetingList.SelectMany(n => n.DayAndTime
+			.Select(p => p.StartTime)
+			.Where(t => t.Ticks > 0))
+			.Distinct()
+			.OrderBy(t => t.Ticks);
+			return times;
 		}
 
 		private IEnumerable<Meeting> SortedOnStartTime(List<Meeting> meetings)

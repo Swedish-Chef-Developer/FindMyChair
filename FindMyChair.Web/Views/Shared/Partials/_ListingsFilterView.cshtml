@@ -1,47 +1,112 @@
 ﻿@using FindMyChair.Web.Models.Meetings;
+@using FindMyChair.Utilities;
 @model FilterSorting
+@{
+	var textUtility = new TextUtility();
+}
 <div class="meeting-filter-wrapper">
-	<div class="meeting-filter-heading">
-		<h4>Filter och Sortering</h4>
-	</div>
 	<form method="post" action='@Url.Action("AASortFilter", "Home")' id="filtersortform">
-		<div class="meeting-filter">
-			<div class='col-md-12 form-group row'>
-				<div class="col-md-12">
-					<label for="test">Välj stad/städer</label>
-					<span class="selec-info">(för multi håll ned Ctrl/Command och klicka på val)</span>
-				</div>
-				<div class="col-md-5">
-					<select name="cities" class="form-control" multiple>
-						<option></option>
-						@if (null != Model && null != Model.CityList)
-						{
-							foreach (var city in Model.CityList)
+		<div class="col-md-12 form-group row meeting-filter-heading">
+			<h4>Filter och Sortering</h4>
+		</div>
+		<div class='row'>
+			<div class="meeting-filter form-group col-md-12">
+				<div class="form-group col-md-6">
+					<div class="col-md-12">
+						<label for="select-cities">Välj stad/städer</label>
+						<span class="select-info">(för multi håll ned Ctrl/Command och klicka på val)</span>
+						<select name="cities" class="form-control select-control" multiple>
+							<option selected>Inget val</option>
+							@if (null != Model && null != Model.CityList)
 							{
-								if (char.IsDigit(city.ToString()[0])) { continue; }
-								<option value="@city.Trim()">@city.Trim()</option>
+								foreach (var city in Model.CityList)
+								{
+									if (char.IsDigit(city.ToString()[0])) { continue; }
+									<option value="@city.Trim()">@city.Trim()</option>
+								}
 							}
-						}
-					</select>
+						</select>
+					</div>
+				</div>
+				<div class="form-group col-md-6">
+					<div class="col-md-12">
+						<label for="select-meeting-types">Välj mötestyp</label>
+						<span class="select-info">(för multi håll ned Ctrl/Command och klicka på val)</span>
+						<select name="meetingtypes" class="form-control select-control" multiple>
+							<option selected>Inget val</option>
+							@if (null != Model && null != Model.MeetingTypeList)
+							{
+								foreach (var type in Model.MeetingTypeList)
+								{
+									<option value="@Convert.ToInt32(type)">@textUtility.GetEnumDescription(type)</option>
+								}
+							}
+						</select>
+					</div>
+				</div>
+				<div class="form-group col-md-6">
+					<div class="col-md-12">
+						<label for="select-meeting-types">Tidigaste möten</label>
+						<select name="starttime" class="form-control select-control">
+							<option selected>Inget val</option>
+							@if (null != Model && null != Model.StartTimes && Model.StartTimes.Any())
+							{
+								foreach (var time in Model.StartTimes)
+								{
+									if (time.Ticks <= 0) { continue; }
+									var startTime = textUtility.FormatTimeSpan(time);
+									<option value="@time">@startTime</option>
+								}
+							}
+						</select>
+					</div>
+				</div>
+				<div class="form-group col-md-6">
+					<div class="col-md-12">
+						<label for="select-meeting-types">Senaste möten</label>
+						<select name="latesttime" class="form-control select-control">
+							<option selected>Inget val</option>
+							@if (null != Model && null != Model.StartTimes && Model.StartTimes.Any())
+							{
+								foreach (var time in Model.StartTimes)
+								{
+									if (time.Ticks <= 0) { continue; }
+									var startTime = textUtility.FormatTimeSpan(time);
+									<option value="@time">@startTime</option>
+								}
+							}
+						</select>
+					</div>
+				</div>
+				<div class="form-group col-md-6">
+					<div class="col-md-12">
+						<label for="sort">Sortera</label>
+						<span class="select-info"> </span>
+						<select name="sorting" class="form-control select-control">
+							<option value="acsending-name" selected>Namn A-Ö</option>
+							<option value="decsending-name">Namn Ö-A</option>
+							<option value="time-ascending">Start tid närmast</option>
+							<option value="time-descending">Start tid senast</option>
+						</select>
+					</div>
 				</div>
 			</div>
-		</div>
-		<div class="meeting-sort">
-			<div class='col-md-12 form-group row'>
-				<div class="col-md-12"><label for="test">Sortera</label></div>
-				<div class="col-md-5">
-					<select name="sorting" class="form-control">
-						<option></option>
-						<option value="acsending-name">Namn A-Ö</option>
-						<option value="decsending-name">Namn Ö-A</option>
-						<option value="time-ascending">Start tid närmast</option>
-						<option value="time-descending">Start tid senast</option>
-					</select>
+			<div class="col-md-12 form-group row meeting-filter-footer">
+				<div class="row">
+					<div class="col-lg-10">
+						<div class="checkbox checkbox-inline checkbox-right">
+							<label>
+								<input type="checkbox" name="onlyToday">
+								<span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span>
+								Visa bara dagens möten
+							</label>
+						</div>
+					</div>
+					<div class="col-lg-1">
+						<button class="btn btn-primary mb-2" type="submit" id="filtersort">Visa Resultat</button>
+					</div>
 				</div>
 			</div>
-		</div>
-		<div class="meeting-filter-footer">
-			<button class="btn btn-secondary my-2 my-sm-0" type="submit" id="filtersort">Visa Resultat</button>
 		</div>
 	</form>
 </div>
