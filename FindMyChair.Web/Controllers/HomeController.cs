@@ -89,8 +89,7 @@ namespace FindMyChair.Web.Controllers
 		[HttpPost]
 		public async Task<ActionResult> AASortFilter(FormCollection form)
 		{			
-			var filtered = false;
-			var sorted = false;
+			var earlyAndLate = false;
 			var onlyToday = false;
 			if (null == Session["AAMeetingList"])
 			{
@@ -104,26 +103,33 @@ namespace FindMyChair.Web.Controllers
 			if (null != form["cities"] && form["cities"].Length > 0 && form["cities"].ToLower() != "inget val")
 			{
 				var cities = Castings.ToList(form["cities"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
-				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, cities, FilterTypes.Cities, onlyToday);
-				filtered = true;
+				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, cities, FilterTypes.Cities);
 			}
 			if (null != form["meetingtypes"] && form["meetingtypes"].Length > 0 && form["meetingtypes"].ToLower() != "inget val")
 			{
 				var meetingTypes = Castings.ToList(form["meetingtypes"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
-				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTypes, FilterTypes.Meetings, onlyToday);
-				filtered = true;
+				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTypes, FilterTypes.Meetings);
 			}
-			if (null != form["starttime"] && form["starttime"].Length > 0 && form["starttime"].ToLower() != "inget val")
+			if ((null != form["starttime"] && form["starttime"].Length > 0 && form["starttime"].ToLower() != "inget val" && !earlyAndLate) &&
+					(null != form["latesttime"] && form["latesttime"].Length > 0 && form["latesttime"].ToLower() != "inget val"))
+			{
+				var earlyAndLateTimes = new List<string> { form["starttime"].ToString(), form["latesttime"].ToString() };
+				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, earlyAndLateTimes, FilterTypes.TimeBetweenEarlyAndLate);
+				earlyAndLate = true;
+			}
+			if (null != form["starttime"] && form["starttime"].Length > 0 && form["starttime"].ToLower() != "inget val" && !earlyAndLate)
 			{
 				var earlyTimes = Castings.ToList(form["starttime"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, earlyTimes, FilterTypes.EarliestTime, onlyToday);
-				filtered = true;
 			}
-			if (null != form["latesttime"] && form["latesttime"].Length > 0 && form["latesttime"].ToLower() != "inget val")
+			if (null != form["latesttime"] && form["latesttime"].Length > 0 && form["latesttime"].ToLower() != "inget val" && !earlyAndLate)
 			{
 				var meetingTimes = Castings.ToList(form["latesttime"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTimes, FilterTypes.LatestTime, onlyToday);
-				filtered = true;
+			}
+			if (onlyToday)
+			{
+				sortedList = _filterAndSortingUtility.GetTodaysMeetings(sortedList);
 			}
 			if (null != form["sorting"] && form["sorting"].Length > 0 && form["sorting"].ToLower() != "inget val")
 			{
@@ -131,25 +137,17 @@ namespace FindMyChair.Web.Controllers
 				{
 					case "acsending-name":
 						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.NameAZ);
-						sorted = true;
 						break;
 					case "decsending-name":
 						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.NameZA);
-						sorted = true;
 						break;
 					case "time-ascending":
 						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.TimeEarlyToLate);
-						sorted = true;
 						break;
 					case "time-descending":
 						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.TimeLateToEarly);
-						sorted = true;
 						break;
 				}
-			}
-			if (onlyToday)
-			{
-				sortedList = _filterAndSortingUtility.GetTodaysMeetings(sortedList);
 			}
 			if (null != sortedList && sortedList.Any())
 				return PartialView("~/Views/Home/Partials/_MeetingList.cshtml", sortedList);

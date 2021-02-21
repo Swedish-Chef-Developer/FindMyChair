@@ -45,6 +45,7 @@ namespace FindMyChair.Utilities
 				{
 					case FilterTypes.Cities:
 						workList = new List<Meeting>();
+						filteredList = onlyToday ? SetTodaysMeetings(filteredList) : filteredList;
 						foreach (var term in terms)
 						{
 							var filteredMeetingsCity = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
@@ -59,6 +60,7 @@ namespace FindMyChair.Utilities
 						break;
 					case FilterTypes.Meetings:
 						workList = new List<Meeting>();
+						filteredList = onlyToday ? SetTodaysMeetings(filteredList) : filteredList;
 						foreach (var term in terms)
 						{
 							var filteredMeetings = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
@@ -72,47 +74,65 @@ namespace FindMyChair.Utilities
 						break;
 					case FilterTypes.EarliestTime:
 						workList = new List<Meeting>();
+						filteredList = onlyToday ? SetTodaysMeetings(filteredList) : filteredList;
 						var filteredMeetingsEarly = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
 						foreach (var term in terms)
 						{
 							TimeSpan.TryParse(term, out TimeSpan timeSpan);
-							var meetingsFiltered = (from meeting in filteredMeetingsEarly
+							var meetingsFilterEarly = (from meeting in filteredMeetingsEarly
 													from day in meeting.DayAndTime
-													where day.StartTime.Ticks > 0 && day.StartTime >= timeSpan
+													where day.StartTime.Ticks > 0 && 
+													day.StartTime.Ticks >= timeSpan.Ticks
 													orderby day.StartTime.Ticks
 													select meeting).ToList().Distinct();
-							workList = workList.Concat(meetingsFiltered).ToList();
+							workList = workList.Concat(meetingsFilterEarly).ToList();
 						}
 						filteredList = workList;
 						break;
 					case FilterTypes.LatestTime:
 						workList = new List<Meeting>();
+						filteredList = onlyToday ? SetTodaysMeetings(filteredList) : filteredList;
 						var filteredMeetingsLate = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
 						foreach (var term in terms)
 						{
 							TimeSpan.TryParse(term, out TimeSpan timeSpan);
-							var meetingsFiltered = (from meeting in filteredMeetingsLate
+							var meetingsFilteredLatest = (from meeting in filteredMeetingsLate
 													from day in meeting.DayAndTime
 													where day.StartTime.Ticks > 0 &&
-													day.StartTime <= timeSpan
+													day.StartTime.Ticks <= timeSpan.Ticks
 													orderby day.StartTime.Ticks
 													select meeting).ToList().Distinct();
-							workList = workList.Concat(meetingsFiltered).ToList();
+							workList = workList.Concat(meetingsFilteredLatest).ToList();
 						}
 						filteredList = workList;
 						break;
+					case FilterTypes.TimeBetweenEarlyAndLate:
+						workList = new List<Meeting>();
+						var filteredMeetingsTimes = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
+						if (null == terms || !terms.Any() || terms.Count != 2) return filteredList;
+						var earlyTime = terms[0];
+						var lateTime = terms[1];
+						TimeSpan.TryParse(earlyTime, out TimeSpan timeSpanEarly);
+						TimeSpan.TryParse(lateTime, out TimeSpan timeSpanLate);
+						var meetingsFiltered = (from meeting in filteredMeetingsTimes
+												from day in meeting.DayAndTime
+												where day.StartTime.Ticks > 0 &&
+												day.StartTime >= timeSpanEarly && 
+												day.StartTime <= timeSpanLate
+												orderby day.StartTime.Ticks
+												select meeting).ToList().Distinct();
+						workList = workList.Concat(meetingsFiltered).ToList();
+						if (onlyToday) workList = SetTodaysMeetings(workList);
+						filteredList = workList;
+						break;
 				}
-			}
-			if (onlyToday)
-			{
-				filteredList = SetTodaysMeetings(filteredList);
 			}
 			return filteredList;
 		}
 
 		private List<Meeting> SetListSorted(List<Meeting> meetings, SortingTypes type, bool onlyToday = false)
 		{
-			var sortedList = meetings;
+			var sortedList = onlyToday ? SetTodaysMeetings(meetings) : meetings;
 			if (null != sortedList && sortedList.Any())
 			{
 				switch (type)
@@ -129,7 +149,7 @@ namespace FindMyChair.Utilities
 											  where day.StartTime.Ticks > 0
 											  orderby day.StartTime.Ticks
 											  select meeting).ToList().Distinct();
-						sortedList = Castings.ToList(sortedMeetings);
+						sortedList = onlyToday ? SetTodaysMeetings(Castings.ToList(sortedMeetings)) : Castings.ToList(sortedMeetings);
 						break;
 					case SortingTypes.TimeLateToEarly:
 						var sortedMeetingList = (from meeting in sortedList
@@ -137,13 +157,9 @@ namespace FindMyChair.Utilities
 												 where day.StartTime.Ticks > 0
 												 orderby day.StartTime.Ticks descending
 												 select meeting).ToList().Distinct();
-						sortedList = Castings.ToList(sortedMeetingList);
+						sortedList = onlyToday ? SetTodaysMeetings(Castings.ToList(sortedMeetingList)) : Castings.ToList(sortedMeetingList);
 						break;
 				}
-			}
-			if (onlyToday)
-			{
-				sortedList = SetTodaysMeetings(sortedList);
 			}
 			return sortedList;
 		}
@@ -153,8 +169,10 @@ namespace FindMyChair.Utilities
 			if (null != meetings && meetings.Any())
 			{
 				var curentDay = _aaClient.GetCurrentDay();
-				var filteredMeetings = meetings.Where(m => m.DayAndTime.Any(dt => dt.StartTime.Ticks > 0 && dt.MeetingDay == curentDay))
-								 .ToList();
+				var filteredMeetings = meetings.Where(m => m.DayAndTime.All(dt => dt.MeetingDay == curentDay && dt.StartTime.Ticks > 0))
+					.Select(m => m)
+					.Distinct()
+					.ToList();
 				return filteredMeetings;
 			}
 			return meetings;
