@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace FindMyChair.Client
 {
-	public interface IAAClient
+	public interface INAClient
 	{
 		Task<IEnumerable<Meeting>> GetMeetingsList();
 	}

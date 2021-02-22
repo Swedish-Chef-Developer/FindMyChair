@@ -20,9 +20,9 @@ namespace FindMyChair.Models.Meetings
         public bool HandicapFriendly { get; set; }
         public string Language { get; set; }
         public string AdditionalInformationHtmlString { get; set; }
-        public List<string> NotesList { get; set; }
-        public List<string> AdditionalInfo { get; set; }
-        public List<MeetingSpecific> DayAndTime { get; set; }
+        public IEnumerable<string> NotesList { get; set; }
+        public IEnumerable<string> AdditionalInfo { get; set; }
+        public IEnumerable<MeetingSpecific> DayAndTime { get; set; }
         public Address Address { get; set; }
     }
 }

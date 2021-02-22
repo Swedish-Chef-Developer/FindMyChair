@@ -11,35 +11,45 @@ using static FindMyChair.Types.FilterSortTypes;
 using FindMyChair.Utilities;
 using FindMyChair.Web.Models.Meetings;
 using System.Linq;
-using System.Data.SqlClient;
 using FindMyChair.Types;
 using System;
+using System.Web.Caching;
 
 namespace FindMyChair.Web.Controllers
 {
 	public class HomeController : Controller
 	{
 		private readonly AAClient _aaClient;
+		private readonly CAClient _caClient;
+		private readonly NAClient _naClient;
 		private readonly BingClient _bingClient;
 		private readonly string _bingApiKey;
+		private readonly int _daysToCache;
+		private readonly DateTime _dateToCache;
 		private readonly FilterAndSortingUtility _filterAndSortingUtility;
 
 		public HomeController()
 		{
 			_bingApiKey = ConfigurationManager.AppSettings["BingApiKey"];
+			_daysToCache = Convert.ToInt32(ConfigurationManager.AppSettings["MeetingJsonDayspan"]);
+			_dateToCache = DateTime.Now.AddDays(_daysToCache);
 			_bingClient = new BingClient(_bingApiKey);
 			_aaClient = new AAClient();
+			_caClient = new CAClient();
+			_naClient = new NAClient();
 			_filterAndSortingUtility = new FilterAndSortingUtility();
 		}
 
 		public async Task<ViewResult> Index()
 		{
 			var model = new MeetingsListViewModel();
-			if (null == Session["AAMeetingList"])
+			if (null == HttpContext.Cache.Get("AAMeetingList"))
 			{
-				Session["AAMeetingList"] = await _aaClient.GetMeetingsList();
+				var meetings = await _aaClient.GetMeetingsList();
+				HttpContext.Cache.Insert("AAMeetingList", meetings, null, _dateToCache, Cache.NoSlidingExpiration);
 			}
-			var aaMeetingList = Session["AAMeetingList"] as List<Meeting>;
+			var aaMeetingList = HttpContext.Cache.Get("AAMeetingList") as List<Meeting>;
+			var caList = Castings.ToList(await _caClient.GetMeetingsList());
 			model.AAMeetingsList = aaMeetingList;
 			if (null == Session["AATodaysMeetingList"])
 			{
@@ -91,11 +101,12 @@ namespace FindMyChair.Web.Controllers
 		{			
 			var earlyAndLate = false;
 			var onlyToday = false;
-			if (null == Session["AAMeetingList"])
+			if (null == HttpContext.Cache.Get("AAMeetingList"))
 			{
-				Session["AAMeetingList"] = await _aaClient.GetMeetingsList();
+				var meetings = await _aaClient.GetMeetingsList();
+				HttpContext.Cache.Insert("AAMeetingList", meetings, null, _dateToCache, Cache.NoSlidingExpiration);
 			}
-			var sortedList = Session["AAMeetingList"] as List<Meeting>;
+			var sortedList = HttpContext.Cache.Get("AAMeetingList") as List<Meeting>;
 			if (null != form["onlyToday"])
 			{
 				onlyToday = form["onlyToday"] == "on";
@@ -103,49 +114,50 @@ namespace FindMyChair.Web.Controllers
 			if (null != form["cities"] && form["cities"].Length > 0 && form["cities"].ToLower() != "inget val")
 			{
 				var cities = Castings.ToList(form["cities"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
-				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, cities, FilterTypes.Cities);
+				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, cities, FilterTypes.Cities) as List<Meeting>;
 			}
 			if (null != form["meetingtypes"] && form["meetingtypes"].Length > 0 && form["meetingtypes"].ToLower() != "inget val")
 			{
 				var meetingTypes = Castings.ToList(form["meetingtypes"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
-				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTypes, FilterTypes.Meetings);
+				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTypes, FilterTypes.Meetings) as List<Meeting>;
 			}
 			if ((null != form["starttime"] && form["starttime"].Length > 0 && form["starttime"].ToLower() != "inget val" && !earlyAndLate) &&
 					(null != form["latesttime"] && form["latesttime"].Length > 0 && form["latesttime"].ToLower() != "inget val"))
 			{
 				var earlyAndLateTimes = new List<string> { form["starttime"].ToString(), form["latesttime"].ToString() };
-				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, earlyAndLateTimes, FilterTypes.TimeBetweenEarlyAndLate);
+				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, earlyAndLateTimes, FilterTypes.TimeBetweenEarlyAndLate) as List<Meeting>;
 				earlyAndLate = true;
 			}
 			if (null != form["starttime"] && form["starttime"].Length > 0 && form["starttime"].ToLower() != "inget val" && !earlyAndLate)
 			{
 				var earlyTimes = Castings.ToList(form["starttime"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
-				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, earlyTimes, FilterTypes.EarliestTime, onlyToday);
+				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, earlyTimes, FilterTypes.EarliestTime, onlyToday) as List<Meeting>;
 			}
 			if (null != form["latesttime"] && form["latesttime"].Length > 0 && form["latesttime"].ToLower() != "inget val" && !earlyAndLate)
 			{
 				var meetingTimes = Castings.ToList(form["latesttime"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
-				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTimes, FilterTypes.LatestTime, onlyToday);
+				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTimes, FilterTypes.LatestTime, onlyToday) as List<Meeting>;
 			}
 			if (onlyToday)
 			{
-				sortedList = _filterAndSortingUtility.GetTodaysMeetings(sortedList);
+				sortedList = Castings.ToList<Meeting>(_filterAndSortingUtility.GetTodaysMeetings(sortedList));
+				var ee = sortedList;
 			}
 			if (null != form["sorting"] && form["sorting"].Length > 0 && form["sorting"].ToLower() != "inget val")
 			{
 				switch (form["sorting"])
 				{
 					case "acsending-name":
-						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.NameAZ);
+						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.NameAZ) as List<Meeting>;
 						break;
 					case "decsending-name":
-						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.NameZA);
+						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.NameZA) as List<Meeting>;
 						break;
 					case "time-ascending":
-						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.TimeEarlyToLate);
+						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.TimeEarlyToLate) as List<Meeting>;
 						break;
 					case "time-descending":
-						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.TimeLateToEarly);
+						sortedList = _filterAndSortingUtility.GetListSorted(sortedList, SortingTypes.TimeLateToEarly) as List<Meeting>;
 						break;
 				}
 			}

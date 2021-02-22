@@ -14,13 +14,13 @@ using System.Web.UI.WebControls;
 
 namespace FindMyChair.Client
 {
-	public class AAClient : IAAClient
+	public class NAClient : INAClient
 	{
-		private AAScraper _aaScraper;
+		private NAScraper _naScraper;
 
-		public AAClient()
+		public NAClient()
 		{
-			_aaScraper = new AAScraper();
+			_naScraper = new NAScraper();
 		}
 
 		public async Task<IEnumerable<Meeting>> GetMeetingsList()
@@ -33,12 +33,12 @@ namespace FindMyChair.Client
 			return await SetUpcomingMeetingsList(meetingList);
 		}
 
-		public async Task<IEnumerable<string>> GetCities(List<Meeting> meetingList)
+		public async Task<List<string>> GetCities(List<Meeting> meetingList)
 		{
 			return await SetCities(meetingList);
 		}
 
-		public async Task<IEnumerable<MeetingTypes>> GetMeetingTypes(List<Meeting> meetingList)
+		public async Task<List<MeetingTypes>> GetMeetingTypes(List<Meeting> meetingList)
 		{
 			return await SetMeetingTpes(meetingList);
 		}
@@ -55,7 +55,7 @@ namespace FindMyChair.Client
 
 		private async Task<IEnumerable<Meeting>> SetMeetingsList()
 		{
-			return await _aaScraper.GetMeetingList();
+			return await _naScraper.MeetingList();
 		}
 
 		private async Task<IEnumerable<Meeting>> SetUpcomingMeetingsList(List<Meeting> meetingList)
@@ -64,14 +64,14 @@ namespace FindMyChair.Client
 			{
 				var currentTimeString = string.Format("{0}:{1}", DateTime.Now.Hour, DateTime.Now.Minute);
 				var currentTimeSpan = TimeSpan.Parse(currentTimeString);
-				var currentDay = SetCurrentDay();
+				var curentDay = SetCurrentDay();
 				var upcomingList = new List<Meeting>();
 				foreach (var meeting in meetingList)
 				{
 					foreach (var meetingDay in meeting.DayAndTime.OrderByDescending(m => m.StartTime))
 					{
 						if (!upcomingList.Contains(meeting)
-							&& meetingDay.MeetingDay == currentDay
+							&& meetingDay.MeetingDay == curentDay
 							&& meetingDay.StartTime.Ticks >= currentTimeSpan.Ticks)
 						{
 							upcomingList.Add(meeting);
@@ -92,7 +92,7 @@ namespace FindMyChair.Client
 			return dayInt;
 		}
 
-		private async Task<IEnumerable<string>> SetCities(List<Meeting> meetingList)
+		private async Task<List<string>> SetCities(List<Meeting> meetingList)
 		{
 			var cities = new List<string>();
 			var culture = new CultureInfo("sv-SE");
@@ -104,7 +104,7 @@ namespace FindMyChair.Client
 			return cities;
 		}
 
-		private async Task<IEnumerable<MeetingTypes>> SetMeetingTpes(List<Meeting> meetingList)
+		private async Task<List<MeetingTypes>> SetMeetingTpes(List<Meeting> meetingList)
 		{
 			return Castings.ToList(Enum.GetValues(typeof(MeetingTypes)).Cast<MeetingTypes>());
 		}

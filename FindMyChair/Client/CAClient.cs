@@ -14,13 +14,13 @@ using System.Web.UI.WebControls;
 
 namespace FindMyChair.Client
 {
-	public class AAClient : IAAClient
+	public class CAClient : ICAClient
 	{
-		private AAScraper _aaScraper;
+		private CAScraper _caScraper;
 
-		public AAClient()
+		public CAClient()
 		{
-			_aaScraper = new AAScraper();
+			_caScraper = new CAScraper();
 		}
 
 		public async Task<IEnumerable<Meeting>> GetMeetingsList()
@@ -55,7 +55,7 @@ namespace FindMyChair.Client
 
 		private async Task<IEnumerable<Meeting>> SetMeetingsList()
 		{
-			return await _aaScraper.GetMeetingList();
+			return await _caScraper.MeetingList();
 		}
 
 		private async Task<IEnumerable<Meeting>> SetUpcomingMeetingsList(List<Meeting> meetingList)
@@ -64,14 +64,14 @@ namespace FindMyChair.Client
 			{
 				var currentTimeString = string.Format("{0}:{1}", DateTime.Now.Hour, DateTime.Now.Minute);
 				var currentTimeSpan = TimeSpan.Parse(currentTimeString);
-				var currentDay = SetCurrentDay();
+				var curentDay = SetCurrentDay();
 				var upcomingList = new List<Meeting>();
 				foreach (var meeting in meetingList)
 				{
 					foreach (var meetingDay in meeting.DayAndTime.OrderByDescending(m => m.StartTime))
 					{
 						if (!upcomingList.Contains(meeting)
-							&& meetingDay.MeetingDay == currentDay
+							&& meetingDay.MeetingDay == curentDay
 							&& meetingDay.StartTime.Ticks >= currentTimeSpan.Ticks)
 						{
 							upcomingList.Add(meeting);

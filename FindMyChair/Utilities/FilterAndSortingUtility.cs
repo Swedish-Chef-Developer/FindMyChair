@@ -20,22 +20,22 @@ namespace FindMyChair.Utilities
 			_aaClient = new AAClient();
 		}
 
-		public List<Meeting> GetListFiltered(List<Meeting> meetings, List<string> terms, FilterTypes type, bool onlyToday = false)
+		public IEnumerable<Meeting> GetListFiltered(List<Meeting> meetings, List<string> terms, FilterTypes type, bool onlyToday = false)
 		{
 			return SetListFiltered(meetings, terms, type, onlyToday);
 		}
 
-		public List<Meeting> GetListSorted(List<Meeting> meetings, SortingTypes type, bool onlyToday = false)
+		public IEnumerable<Meeting> GetListSorted(List<Meeting> meetings, SortingTypes type, bool onlyToday = false)
 		{
 			return SetListSorted(meetings, type, onlyToday);
 		}
 
-		public List<Meeting> GetTodaysMeetings(List<Meeting> meetings)
+		public IEnumerable<Meeting> GetTodaysMeetings(List<Meeting> meetings)
 		{
 			return SetTodaysMeetings(meetings);
 		}
 
-		private List<Meeting> SetListFiltered(List<Meeting> meetings, List<string> terms, FilterTypes type, bool onlyToday = false)
+		private IEnumerable<Meeting> SetListFiltered(List<Meeting> meetings, List<string> terms, FilterTypes type, bool onlyToday = false)
 		{
 			var filteredList = new List<Meeting>();
 			var workList = new List<Meeting>();
@@ -45,7 +45,7 @@ namespace FindMyChair.Utilities
 				{
 					case FilterTypes.Cities:
 						workList = new List<Meeting>();
-						filteredList = onlyToday ? SetTodaysMeetings(filteredList) : filteredList;
+						filteredList = onlyToday ? SetTodaysMeetings(filteredList) as List<Meeting> : filteredList;
 						foreach (var term in terms)
 						{
 							var filteredMeetingsCity = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
@@ -60,7 +60,7 @@ namespace FindMyChair.Utilities
 						break;
 					case FilterTypes.Meetings:
 						workList = new List<Meeting>();
-						filteredList = onlyToday ? SetTodaysMeetings(filteredList) : filteredList;
+						filteredList = onlyToday ? SetTodaysMeetings(filteredList) as List<Meeting> : filteredList;
 						foreach (var term in terms)
 						{
 							var filteredMeetings = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
@@ -74,7 +74,7 @@ namespace FindMyChair.Utilities
 						break;
 					case FilterTypes.EarliestTime:
 						workList = new List<Meeting>();
-						filteredList = onlyToday ? SetTodaysMeetings(filteredList) : filteredList;
+						filteredList = onlyToday ? SetTodaysMeetings(filteredList) as List<Meeting> : filteredList;
 						var filteredMeetingsEarly = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
 						foreach (var term in terms)
 						{
@@ -91,7 +91,7 @@ namespace FindMyChair.Utilities
 						break;
 					case FilterTypes.LatestTime:
 						workList = new List<Meeting>();
-						filteredList = onlyToday ? SetTodaysMeetings(filteredList) : filteredList;
+						filteredList = onlyToday ? SetTodaysMeetings(filteredList) as List<Meeting> : filteredList;
 						var filteredMeetingsLate = filteredList.Any() ? filteredList.AsQueryable() : meetings.AsQueryable();
 						foreach (var term in terms)
 						{
@@ -122,7 +122,7 @@ namespace FindMyChair.Utilities
 												orderby day.StartTime.Ticks
 												select meeting).ToList().Distinct();
 						workList = workList.Concat(meetingsFiltered).ToList();
-						if (onlyToday) workList = SetTodaysMeetings(workList);
+						if (onlyToday) workList = SetTodaysMeetings(workList) as List<Meeting>;
 						filteredList = workList;
 						break;
 				}
@@ -130,7 +130,7 @@ namespace FindMyChair.Utilities
 			return filteredList;
 		}
 
-		private List<Meeting> SetListSorted(List<Meeting> meetings, SortingTypes type, bool onlyToday = false)
+		private IEnumerable<Meeting> SetListSorted(List<Meeting> meetings, SortingTypes type, bool onlyToday = false)
 		{
 			var sortedList = onlyToday ? SetTodaysMeetings(meetings) : meetings;
 			if (null != sortedList && sortedList.Any())
@@ -164,15 +164,12 @@ namespace FindMyChair.Utilities
 			return sortedList;
 		}
 
-		private List<Meeting> SetTodaysMeetings(List<Meeting> meetings)
+		private IEnumerable<Meeting> SetTodaysMeetings(List<Meeting> meetings)
 		{
 			if (null != meetings && meetings.Any())
 			{
 				var curentDay = _aaClient.GetCurrentDay();
-				var filteredMeetings = meetings.Where(m => m.DayAndTime.All(dt => dt.MeetingDay == curentDay && dt.StartTime.Ticks > 0))
-					.Select(m => m)
-					.Distinct()
-					.ToList();
+				var filteredMeetings = meetings.Where(m => m.DayAndTime.Any(dt => dt.MeetingDay == curentDay && dt.StartTime.Ticks > 0)).Distinct();
 				return filteredMeetings;
 			}
 			return meetings;

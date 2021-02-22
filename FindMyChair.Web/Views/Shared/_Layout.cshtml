@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using FindMyChair.Web.Utilities;
+@using System.Globalization;
+@{
+	var currentUrl = (null != HttpContext.Current) ? HttpContext.Current.Request.Url.AbsoluteUri : string.Empty; ;
+	var cultureHelper = new CultureHelper();
+	var cultureInfo = new CultureInfo(cultureHelper.GetCultureInfo(currentUrl));
+}
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8" />
@@ -11,35 +18,35 @@
 	<script src="https://npmcdn.com/leaflet@1.3.4/dist/leaflet.js​"></script>
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                    <li>@Html.ActionLink("About", "About", "Home")</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
-        </footer>
-    </div>
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				@Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li><a href="/">@Utilities.GetStringByResourceName("TextHome", cultureInfo)</a></li>
+					<li><a href="/Home/About">@Utilities.GetStringByResourceName("TextAbout", cultureInfo)</a></li>
+					<li><a href="/Home/Contact">@Utilities.GetStringByResourceName("TextContact", cultureInfo)</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="container body-content">
+		@RenderBody()
+		<hr />
+		<footer>
+			<p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+		</footer>
+	</div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @RenderSection("scripts", required: false)
+	@Scripts.Render("~/bundles/jquery")
+	@Scripts.Render("~/bundles/bootstrap")
+	@RenderSection("scripts", required: false)
 </body>
 </html>

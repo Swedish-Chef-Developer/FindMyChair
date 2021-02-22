@@ -6,17 +6,50 @@ using System.Net.Http;
 using FindMyChair.Models.Meetings;
 using HtmlAgilityPack;
 using FindMyChair.Utilities;
-using System.Linq;
 using System.Text;
-using FindMyChair.Types;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Threading.Tasks;
+using System.IO;
+using Newtonsoft.Json;
+using System.Configuration;
 
 namespace FindMyChair.Scrapers
 {
 	public class AAScraper
 	{
-		public IEnumerable<Meeting> MeetingList()
+
+		public async Task<IEnumerable<Meeting>> GetMeetingList()
+		{
+			var daysToUpdate = Convert.ToInt32(ConfigurationManager.AppSettings["MeetingJsonDayspan"]);
+			var folderPath = string.Format("{0}MeetingLists", AppDomain.CurrentDomain.BaseDirectory);
+			Directory.CreateDirectory(folderPath);
+			var filePath = string.Format(@"{0}\AAMeetings.json", folderPath);
+			var meetingsList = new List<Meeting>();
+			var creation = File.GetCreationTime(filePath);
+			var modification = File.GetLastWriteTime(filePath);
+			if (null == creation || creation == DateTime.MinValue || null == modification || modification == DateTime.MinValue
+				|| !File.Exists(filePath) || DateTime.Now >= creation.AddDays(daysToUpdate) 
+				|| DateTime.Now >= modification.AddDays(daysToUpdate))
+			{
+				var meetings = await SetMeetingList();
+				if (null == meetings || !meetings.Any()) return meetingsList;
+				if (File.Exists(filePath)) File.Delete(filePath);
+				File.WriteAllText(filePath, JsonConvert.SerializeObject(meetings));
+				using var file = File.CreateText(filePath);
+				var serializer = new JsonSerializer();
+				serializer.Serialize(file, meetings);
+			}
+			// var deserializedMeetingList = JsonConvert.DeserializeObject<IEnumerable<Meeting>>(File.ReadAllText(filePath));
+			using (var file = File.OpenText(filePath))
+			{
+				var serializer = new JsonSerializer();
+				meetingsList = serializer.Deserialize(file, typeof(List<Meeting>)) as List<Meeting>;
+			}
+			return meetingsList;
+		}
+
+		private async Task<IEnumerable<Meeting>> SetMeetingList()
 		{
 			var scraperUtility = new ScraperUtilities();
 			var textUtility = new TextUtility();
@@ -24,10 +57,10 @@ namespace FindMyChair.Scrapers
 			var url = "http://www.aa.se/aa-moten?search_term=&days_selection=&";
 			//get the html page source 
 			var httpClient = new HttpClient();
-			var html = httpClient.GetStringAsync(url);
+			var html = await httpClient.GetStringAsync(url);
 			//store the html of the page in a variable
 			var doc = new HtmlDocument();
-			doc.LoadHtml(html.Result);
+			doc.LoadHtml(html);
 			var meetingList = new List<Meeting>();
 			var meetingNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'search-meetings-results-item')]");
 			foreach (var meetingNode in meetingNodes)
@@ -307,9 +340,7 @@ namespace FindMyChair.Scrapers
 
 				meetingList.Add(meeting);
 			}
-
 			return meetingList;
 		}
-
 	}
 }

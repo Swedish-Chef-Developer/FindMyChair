@@ -7,7 +7,7 @@ namespace FindMyChair.Web.ViewModels.Meetings
 {
 	public class NearMeViewModel
 	{
-		public List<Meeting> UpcomingMeetingsList { get; set; }
+		public IEnumerable<Meeting> UpcomingMeetingsList { get; set; }
 		public string BingApiKey { get; set; }
 		public LocationLists LocationLists { get; set; }
 		public FilterSorting FilterSorting { get; set; }
