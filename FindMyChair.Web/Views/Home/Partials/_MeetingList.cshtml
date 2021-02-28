@@ -22,18 +22,22 @@
 			<div class="meeting-wrapper">
 				<h3>
 					@meeting.GroupName
-					@foreach (var district in meeting.Address.Districts)
+					@if (null != meeting.Address.Districts && meeting.Address.Districts.Any())
 					{
-						if (counter > 0)
+						foreach (var district in meeting.Address.Districts)
 						{
-							@Html.Raw(",&nbsp;");
+							if (null == district.DistrictName || string.IsNullOrWhiteSpace(district.DistrictName.Trim())) { continue; }
+							if (counter > 0)
+							{
+								@Html.Raw(",&nbsp;");
+							}
+							else
+							{
+								@Html.Raw("&nbsp;-&nbsp;");
+							}
+							<span class="meeting-seperator" name='@string.Format("{0}_{1}", meeting.Id, district.Id)¨'>@district.DistrictName.Trim()</span>
+							counter++;
 						}
-						else
-						{
-							@Html.Raw("&nbsp;-&nbsp;");
-						}
-						<span class="meeting-seperator" name='@string.Format("{0}_{1}", meeting.Id, district.Id)¨'>@district.DistrictName.Trim()</span>
-						counter++;
 					}
 				</h3>
 				<div class="meeting-info-wrapper">
@@ -118,8 +122,9 @@
 								}
 							</div>
 						}
-						@if (!string.IsNullOrWhiteSpace(meeting.AdditionalInformationHtmlString)
-							&& null == meeting.AdditionalInfo && !meeting.AdditionalInfo.Any())
+						@if (null != meeting.AdditionalInformationHtmlString
+							&& !string.IsNullOrWhiteSpace(meeting.AdditionalInformationHtmlString)
+							&& null == meeting.AdditionalInfo)
 						{
 							<div class="meeting-additional-information-expand">Mer Information</div>
 							<div class="meeting-additional-info">
@@ -145,7 +150,7 @@
 								<tr>
 									@for (var d = 0; d < 7; d++)
 									{
-										var dayTimeList = meeting.DayAndTime as List<MeetingSpecific>;
+										var dayTimeList = meeting.DayAndTime.ToList();
 										var dayName = Enum.GetName(typeof(WeekdayNamesSV), dayTimeList[d].MeetingDay);
 										<th>
 											@dayName
@@ -154,43 +159,43 @@
 								</tr>
 							</thead>
 							<tbody>
-								@{var dateTimeList = meeting.DayAndTime as List<MeetingSpecific>; }
-									@for (var i = 0; i < dateTimeList.Count; i++)
+								@{var dateTimeList = meeting.DayAndTime.ToList(); }
+								@for (var i = 0; i < dateTimeList.Count; i++)
+								{
+									if (i % 7 == 0)
 									{
-										if (i % 7 == 0)
+										@Html.Raw("<tr>");
+									}
+									var dateTime = new DateTime(Math.Abs(dateTimeList[i].StartTime.Ticks));
+									var formattedTime = textUtility.FormatTimeSpan(dateTimeList[i].StartTime);
+									var todayClass = string.Empty;
+									if (dateTime.Ticks > 0)
+									{
+										if (dateTimeList[i].MeetingDay == today
+													&& dateTime.Ticks > DateTime.Now.TimeOfDay.Ticks)
 										{
-											@Html.Raw("<tr>");
+											todayClass = "meeting-today";
 										}
-										var dateTime = new DateTime(Math.Abs(dateTimeList[i].StartTime.Ticks));
-										var formattedTime = textUtility.FormatTimeSpan(dateTimeList[i].StartTime);
-										var todayClass = string.Empty;
-										if (dateTime.Ticks > 0)
+									}
+									<td@(timeCounter > 0 && dateTime.Ticks > 0 ? Html.Raw(" class='additional-time'") : Html.Raw("")) style="background-color: @scraperUtility.GetMeetingTypesColorAA(dateTimeList[i].MeetingType)">
+										@if (dateTime.Ticks > 0)
 										{
-											if (dateTimeList[i].MeetingDay == today
-														&& dateTime.Ticks > DateTime.Now.TimeOfDay.Ticks)
-											{
-												todayClass = "meeting-today";
-											}
+											<span class="meeting-table-time @todayClass">@formattedTime</span>
 										}
-										<td@(timeCounter > 0 && dateTime.Ticks > 0 ? Html.Raw(" class='additional-time'") : Html.Raw("")) style="background-color: @scraperUtility.GetMeetingTypesColorAA(dateTimeList[i].MeetingType)">
-											@if (dateTime.Ticks > 0)
-											{
-												<span class="meeting-table-time @todayClass">@formattedTime</span>
-											}
-											else
-											{
-												<span class="meeting-table-time">&nbsp;</span>
-											}
-											</td>
-											formattedTime = string.Empty;
-											if (i != 0 && i % 7 == 6)
-											{
-												@Html.Raw("</tr>");
-												rowCounter++;
-											}
-											timeCounter++;
+										else
+										{
+											<span class="meeting-table-time">&nbsp;</span>
 										}
-							</tbody>
+										</td>
+										formattedTime = string.Empty;
+										if (i != 0 && i % 7 == 6)
+										{
+											@Html.Raw("</tr>");
+											rowCounter++;
+										}
+										timeCounter++;
+									}
+						</tbody>
 					</table>
 				}
 				</div>

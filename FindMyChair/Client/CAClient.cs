@@ -79,7 +79,7 @@ namespace FindMyChair.Client
 						}
 					}
 				}
-				return Castings.ToList(SortedOnStartTime(upcomingList));
+				return Castings.CustomToList(SortedOnStartTime(upcomingList));
 			}
 			return meetingList;
 		}
@@ -96,7 +96,7 @@ namespace FindMyChair.Client
 		{
 			var cities = new List<string>();
 			var culture = new CultureInfo("sv-SE");
-			cities = Castings.ToList(meetingList.Select(c => c.Address.City.Trim())
+			cities = Castings.CustomToList(meetingList.Select(c => c.Address.City.Trim())
 				.Where(s => s.Trim() != "")
 				.Where(m => m.Any(m => char.IsUpper(m.ToString()[0])))
 				.Distinct()
@@ -106,7 +106,7 @@ namespace FindMyChair.Client
 
 		private async Task<IEnumerable<MeetingTypes>> SetMeetingTpes(List<Meeting> meetingList)
 		{
-			return Castings.ToList(Enum.GetValues(typeof(MeetingTypes)).Cast<MeetingTypes>());
+			return Castings.CustomToList(Enum.GetValues(typeof(MeetingTypes)).Cast<MeetingTypes>());
 		}
 
 		private async Task<IEnumerable<TimeSpan>> SetTimes(List<Meeting> meetingList)

@@ -162,6 +162,7 @@
     <Compile Include="Models\Mapping\Locations.cs" />
     <Compile Include="Models\Mapping\LocationsList.cs" />
     <Compile Include="Models\Meetings\Address.cs" />
+    <Compile Include="Models\Meetings\CAJsonToClass.cs" />
     <Compile Include="Models\Meetings\District.cs" />
     <Compile Include="Models\Meetings\Meeting.cs" />
     <Compile Include="Models\Meetings\MeetingSpecific.cs" />

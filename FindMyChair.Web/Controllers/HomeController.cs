@@ -49,8 +49,14 @@ namespace FindMyChair.Web.Controllers
 				HttpContext.Cache.Insert("AAMeetingList", meetings, null, _dateToCache, Cache.NoSlidingExpiration);
 			}
 			var aaMeetingList = HttpContext.Cache.Get("AAMeetingList") as List<Meeting>;
-			var caList = Castings.ToList(await _caClient.GetMeetingsList());
+			if (null == HttpContext.Cache.Get("CAMeetingList"))
+			{
+				var meetings = await _caClient.GetMeetingsList() as List<Meeting>;
+				HttpContext.Cache.Insert("CAMeetingList", meetings, null, _dateToCache, Cache.NoSlidingExpiration);
+			}
+			var caMeetingList = HttpContext.Cache.Get("CAMeetingList") as List<Meeting>;
 			model.AAMeetingsList = aaMeetingList;
+			model.CAMeetingsList = caMeetingList;
 			if (null == Session["AATodaysMeetingList"])
 			{
 				Session["AATodaysMeetingList"] = await _aaClient.GetUpcomingMeetingsList(aaMeetingList);
@@ -74,7 +80,7 @@ namespace FindMyChair.Web.Controllers
 			{
 				CityList = await _aaClient.GetCities(aaMeetingList),
 				MeetingTypeList = await _aaClient.GetMeetingTypes(aaMeetingList),
-				StartTimes = Castings.ToList<TimeSpan>(d),
+				StartTimes = Castings.CustomToList<TimeSpan>(d),
 				MeetingsList = aaMeetingList,
 				BingApiKey = _bingApiKey
 			};
@@ -113,12 +119,12 @@ namespace FindMyChair.Web.Controllers
 			}
 			if (null != form["cities"] && form["cities"].Length > 0 && form["cities"].ToLower() != "inget val")
 			{
-				var cities = Castings.ToList(form["cities"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+				var cities = Castings.CustomToList(form["cities"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, cities, FilterTypes.Cities) as List<Meeting>;
 			}
 			if (null != form["meetingtypes"] && form["meetingtypes"].Length > 0 && form["meetingtypes"].ToLower() != "inget val")
 			{
-				var meetingTypes = Castings.ToList(form["meetingtypes"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+				var meetingTypes = Castings.CustomToList(form["meetingtypes"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTypes, FilterTypes.Meetings) as List<Meeting>;
 			}
 			if ((null != form["starttime"] && form["starttime"].Length > 0 && form["starttime"].ToLower() != "inget val" && !earlyAndLate) &&
@@ -130,17 +136,17 @@ namespace FindMyChair.Web.Controllers
 			}
 			if (null != form["starttime"] && form["starttime"].Length > 0 && form["starttime"].ToLower() != "inget val" && !earlyAndLate)
 			{
-				var earlyTimes = Castings.ToList(form["starttime"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+				var earlyTimes = Castings.CustomToList(form["starttime"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, earlyTimes, FilterTypes.EarliestTime, onlyToday) as List<Meeting>;
 			}
 			if (null != form["latesttime"] && form["latesttime"].Length > 0 && form["latesttime"].ToLower() != "inget val" && !earlyAndLate)
 			{
-				var meetingTimes = Castings.ToList(form["latesttime"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+				var meetingTimes = Castings.CustomToList(form["latesttime"].Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries));
 				sortedList = _filterAndSortingUtility.GetListFiltered(sortedList, meetingTimes, FilterTypes.LatestTime, onlyToday) as List<Meeting>;
 			}
 			if (onlyToday)
 			{
-				sortedList = Castings.ToList<Meeting>(_filterAndSortingUtility.GetTodaysMeetings(sortedList));
+				sortedList = Castings.CustomToList<Meeting>(_filterAndSortingUtility.GetTodaysMeetings(sortedList));
 				var ee = sortedList;
 			}
 			if (null != form["sorting"] && form["sorting"].Length > 0 && form["sorting"].ToLower() != "inget val")

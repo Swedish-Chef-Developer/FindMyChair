@@ -1,9 +1,6 @@
 ﻿using FindMyChair.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using FindMyChair.Types;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace FindMyChair.Utilities
 {
@@ -27,6 +24,22 @@ namespace FindMyChair.Utilities
 			};
 		}
 
+		public MeetingTypes GetMeetingTypesCA(string type)
+		{
+			return type switch
+			{
+				("Slutet möte") => MeetingTypes.Closed,
+				("Mansmöte") => MeetingTypes.Mens,
+				("Kvinnomöte") => MeetingTypes.Womens,
+				("#db9930") => MeetingTypes.YPAA,
+				("Öppet möte") => MeetingTypes.Open,
+				("Onlinemöte") => MeetingTypes.Online,
+				("Stegmöte") => MeetingTypes.Step,
+				("Traditionsmöte") => MeetingTypes.Tradition,
+				_ => MeetingTypes.NotSet,
+			};
+		}
+
 		public string GetMeetingTypesColorAA(MeetingTypes meetingType)
 		{
 			return meetingType switch
@@ -38,6 +51,16 @@ namespace FindMyChair.Utilities
 				(MeetingTypes.Open) => "#97b6a7",
 				_ => "none",
 			};
+		}
+
+		public object DeserializeFromStream(Stream stream)
+		{
+			var serializer = new JsonSerializer();
+			using (var sr = new StreamReader(stream))
+			using (var jsonTextReader = new JsonTextReader(sr))
+			{
+				return serializer.Deserialize(jsonTextReader);
+			}
 		}
 	}
 }

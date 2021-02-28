@@ -12,19 +12,23 @@ namespace FindMyChair.Types
         Open = 1,
         [Description("Stängt möte")]
         Closed = 2,
-        [Description("Mans möte")]
+        [Description("Mansmöte")]
         Mens = 3,
-        [Description("Kvinno möte")]
+        [Description("Kvinnomöte")]
         Womens = 4,
         [Description("Big Book möte")]
         BigBook = 5,
-        [Description("Litteratur möte")]
+        [Description("Litteraturmöte")]
         Litterature = 6,
-        [Description("Ungdoms möte")]
+        [Description("Ungdomsmöte")]
         YPAA = 7,
-        [Description("Online möte")]
+        [Description("Onlinemöte")]
         Online = 8,
+        [Description("Stegmöte")]
+        Step = 9,
+        [Description("Traditionsmöte")]
+        Tradition = 10,
         [Description("")]
-        NotSet = 9
+        NotSet = 11
     }
 }

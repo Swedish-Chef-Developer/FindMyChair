@@ -31,7 +31,10 @@
 			}
 		</div>
 		<div id="ca" class="tab-pane">
-			CA
+			@if (null != Model.CAMeetingsList && Model.CAMeetingsList.Any())
+			{
+				Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.CAMeetingsList);
+			}
 		</div>
 		<div id="daa" class="tab-pane">
 			DAA

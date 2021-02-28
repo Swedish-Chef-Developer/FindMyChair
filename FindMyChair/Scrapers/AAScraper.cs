@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 using System.Configuration;
+using System.Linq.Expressions;
 
 namespace FindMyChair.Scrapers
 {
@@ -63,7 +64,10 @@ namespace FindMyChair.Scrapers
 			doc.LoadHtml(html);
 			var meetingList = new List<Meeting>();
 			var meetingNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'search-meetings-results-item')]");
-			foreach (var meetingNode in meetingNodes)
+			var culture = new CultureInfo("sv-SE");
+			var orderedList = meetingNodes.OrderBy(mn => mn.Descendants("h3").FirstOrDefault().InnerText.Split(new string[] { "," }, 
+													StringSplitOptions.RemoveEmptyEntries).FirstOrDefault().Trim());
+			foreach (var meetingNode in orderedList)
 			{
 				var meeting = new Meeting
 				{
@@ -75,7 +79,8 @@ namespace FindMyChair.Scrapers
 										&& null != n.Attributes["class"]
 										&& n.Attributes["class"].Value.Contains("circle")).FirstOrDefault();
 				meeting.HandicapFriendly = isHandicapFriendly;
-				var titleArray = title.Split(',');
+				var titleArray = title.Split(new string[] { "," },
+													StringSplitOptions.RemoveEmptyEntries);
 				meeting.GroupName = !string.IsNullOrWhiteSpace(titleArray.FirstOrDefault())
 					? titleArray.FirstOrDefault().Trim()
 					: string.Empty;
@@ -304,7 +309,6 @@ namespace FindMyChair.Scrapers
 					for (var dt = 0; dt < tableBodyCells.Count; dt++)
 					{
 						var meetingSpecific = new MeetingSpecific();
-						var eee = tableBodyCells[dt].InnerText.Trim();
 						DateTime.TryParseExact(tableBodyCells[dt].InnerText.Trim(), "HH:mm", CultureInfo.InvariantCulture,
 																	  DateTimeStyles.None, out DateTime dateTime);
 						TimeSpan time = dateTime.TimeOfDay;

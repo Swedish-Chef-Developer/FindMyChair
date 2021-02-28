@@ -138,10 +138,10 @@ namespace FindMyChair.Utilities
 				switch (type)
 				{
 					case SortingTypes.NameAZ:
-						sortedList = Castings.ToList(sortedList.OrderBy(m => m.GroupName));
+						sortedList = Castings.CustomToList(sortedList.OrderBy(m => m.GroupName));
 						break;
 					case SortingTypes.NameZA:
-						sortedList = Castings.ToList(sortedList.OrderByDescending(m => m.GroupName));
+						sortedList = Castings.CustomToList(sortedList.OrderByDescending(m => m.GroupName));
 						break;
 					case SortingTypes.TimeEarlyToLate:
 						var sortedMeetings = (from meeting in sortedList
@@ -149,7 +149,7 @@ namespace FindMyChair.Utilities
 											  where day.StartTime.Ticks > 0
 											  orderby day.StartTime.Ticks
 											  select meeting).ToList().Distinct();
-						sortedList = onlyToday ? SetTodaysMeetings(Castings.ToList(sortedMeetings)) : Castings.ToList(sortedMeetings);
+						sortedList = onlyToday ? SetTodaysMeetings(Castings.CustomToList(sortedMeetings)) : Castings.CustomToList(sortedMeetings);
 						break;
 					case SortingTypes.TimeLateToEarly:
 						var sortedMeetingList = (from meeting in sortedList
@@ -157,7 +157,7 @@ namespace FindMyChair.Utilities
 												 where day.StartTime.Ticks > 0
 												 orderby day.StartTime.Ticks descending
 												 select meeting).ToList().Distinct();
-						sortedList = onlyToday ? SetTodaysMeetings(Castings.ToList(sortedMeetingList)) : Castings.ToList(sortedMeetingList);
+						sortedList = onlyToday ? SetTodaysMeetings(Castings.CustomToList(sortedMeetingList)) : Castings.CustomToList(sortedMeetingList);
 						break;
 				}
 			}
