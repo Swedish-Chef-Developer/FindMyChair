@@ -16,6 +16,12 @@
 @if (null != Model)
 {
 	<section class="inner-content" id="list-content">
+		@if (!string.IsNullOrWhiteSpace(ViewBag.MeetingTitle))
+		{
+		<div class="heading">
+			<h3>@ViewBag.MeetingTitle</h3>
+		</div>
+		}
 		@foreach (var meeting in Model)
 		{
 			var counter = 0;

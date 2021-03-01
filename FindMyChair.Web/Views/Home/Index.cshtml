@@ -26,6 +26,7 @@
 		<div id="aa" class="tab-pane">
 			@if (null != Model.AAMeetingsList && Model.AAMeetingsList.Any())
 			{
+				ViewBag.MeetingTitle = "AA möten";
 				Html.RenderPartial("~/Views/Shared/Partials/_ListingsFilterView.cshtml", Model.FilterSorting);
 				Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.AAMeetingsList);
 			}
@@ -33,6 +34,7 @@
 		<div id="ca" class="tab-pane">
 			@if (null != Model.CAMeetingsList && Model.CAMeetingsList.Any())
 			{
+				ViewBag.MeetingTitle = "CA möten";
 				Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.CAMeetingsList);
 			}
 		</div>

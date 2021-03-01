@@ -41,7 +41,6 @@ namespace FindMyChair.Scrapers
 				var serializer = new JsonSerializer();
 				serializer.Serialize(file, meetings);
 			}
-			// var deserializedMeetingList = JsonConvert.DeserializeObject<IEnumerable<Meeting>>(File.ReadAllText(filePath));
 			using (var file = File.OpenText(filePath))
 			{
 				var serializer = new JsonSerializer();

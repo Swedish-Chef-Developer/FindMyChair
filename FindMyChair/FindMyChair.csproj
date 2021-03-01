@@ -166,6 +166,7 @@
     <Compile Include="Models\Meetings\District.cs" />
     <Compile Include="Models\Meetings\Meeting.cs" />
     <Compile Include="Models\Meetings\MeetingSpecific.cs" />
+    <Compile Include="Models\Meetings\NAJasonToClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scrapers\CAScraper .cs" />
     <Compile Include="Scrapers\NAScraper.cs" />

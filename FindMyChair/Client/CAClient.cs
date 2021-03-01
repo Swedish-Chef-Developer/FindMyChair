@@ -55,7 +55,7 @@ namespace FindMyChair.Client
 
 		private async Task<IEnumerable<Meeting>> SetMeetingsList()
 		{
-			return await _caScraper.MeetingList();
+			return await _caScraper.GetMeetingList();
 		}
 
 		private async Task<IEnumerable<Meeting>> SetUpcomingMeetingsList(List<Meeting> meetingList)

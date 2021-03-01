@@ -12,15 +12,44 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using System.IO;
-using System.IO.Compression;
 using System.Text.RegularExpressions;
+using System.Configuration;
+using System.IO;
 
 namespace FindMyChair.Scrapers
 {
 	public class CAScraper
 	{
-		public async Task<IEnumerable<Meeting>> MeetingList()
+		public async Task<IEnumerable<Meeting>> GetMeetingList()
+		{
+			var daysToUpdate = Convert.ToInt32(ConfigurationManager.AppSettings["MeetingJsonDayspan"]);
+			var folderPath = string.Format("{0}MeetingLists", AppDomain.CurrentDomain.BaseDirectory);
+			Directory.CreateDirectory(folderPath);
+			var filePath = string.Format(@"{0}\CAMeetings.json", folderPath);
+			var meetingsList = new List<Meeting>();
+			var creation = File.GetCreationTime(filePath);
+			var modification = File.GetLastWriteTime(filePath);
+			if (null == creation || creation == DateTime.MinValue || null == modification || modification == DateTime.MinValue
+				|| !File.Exists(filePath) || DateTime.Now >= creation.AddDays(daysToUpdate)
+				|| DateTime.Now >= modification.AddDays(daysToUpdate))
+			{
+				var meetings = await SetMeetingList();
+				if (null == meetings || !meetings.Any()) return meetingsList;
+				if (File.Exists(filePath)) File.Delete(filePath);
+				File.WriteAllText(filePath, JsonConvert.SerializeObject(meetings));
+				using var file = File.CreateText(filePath);
+				var serializer = new JsonSerializer();
+				serializer.Serialize(file, meetings);
+			}
+			using (var file = File.OpenText(filePath))
+			{
+				var serializer = new JsonSerializer();
+				meetingsList = serializer.Deserialize(file, typeof(List<Meeting>)) as List<Meeting>;
+			}
+			return meetingsList;
+		}
+
+		private async Task<IEnumerable<Meeting>> SetMeetingList()
 		{
 			var scraperUtility = new ScraperUtilities();
 			var textUtility = new TextUtility();
@@ -37,7 +66,6 @@ namespace FindMyChair.Scrapers
 				caMeetings = JsonConvert.DeserializeObject<List<CAJsonToClass>>(ret);
 			}
 			var meetingList = new List<Meeting>();
-			var weekCount = 1;
 			if (null != caMeetings && caMeetings.Any())
 			{
 				var dayAndTime = new List<MeetingSpecific>();
@@ -49,11 +77,6 @@ namespace FindMyChair.Scrapers
 					{
 						meeting = meetingList.Where(m => m.GroupName.Trim() == caMeeting.group.name.Trim()).FirstOrDefault();
 						meetingExist = true;
-						weekCount++;
-					}
-					else
-					{
-						weekCount = 0;
 					}
 					if (!meetingExist)
 					{
@@ -115,7 +138,7 @@ namespace FindMyChair.Scrapers
 					meetingSpecifics.StartTime = startTime;
 					meetingSpecifics.EndTime = endTime;
 					dayAndTime = (null != meeting.DayAndTime && meeting.DayAndTime.Any())
-						? meeting.DayAndTime.ToList() // (from dayTime in meeting.DayAndTime orderby dayTime.MeetingDay, dayTime.StartTime.Ticks select dayTime).ToList()
+						? meeting.DayAndTime.ToList()
 						: new List<MeetingSpecific>();
 					if (null != dayAndTime && !dayAndTime.Any())
 					{

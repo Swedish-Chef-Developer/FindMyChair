@@ -55,6 +55,7 @@ namespace FindMyChair.Web.Controllers
 				HttpContext.Cache.Insert("CAMeetingList", meetings, null, _dateToCache, Cache.NoSlidingExpiration);
 			}
 			var caMeetingList = HttpContext.Cache.Get("CAMeetingList") as List<Meeting>;
+			var naList = _naClient.GetMeetingsList();
 			model.AAMeetingsList = aaMeetingList;
 			model.CAMeetingsList = caMeetingList;
 			if (null == Session["AATodaysMeetingList"])

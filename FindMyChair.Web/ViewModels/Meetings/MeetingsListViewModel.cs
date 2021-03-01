@@ -8,6 +8,7 @@ namespace FindMyChair.Web.ViewModels.Meetings
     {
         public IEnumerable<Meeting>  AAMeetingsList { get; set; }
         public IEnumerable<Meeting> CAMeetingsList { get; set; }
+        public IEnumerable<Meeting> NAMeetingsList { get; set; }
         public NearMeViewModel NearMeViewModel { get; set; }
         public string LongitudesAndLattitudesListString { get; set; }
         public string BingApiKey { get; set; }
