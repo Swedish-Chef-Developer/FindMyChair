@@ -114,12 +114,19 @@ namespace FindMyChair.Scrapers
 					TimeSpan endTime = dateTime.AddMinutes(caMeeting.duration).TimeOfDay;
 					meetingSpecifics.StartTime = startTime;
 					meetingSpecifics.EndTime = endTime;
-					dayAndTime = (null != meeting.DayAndTime && meeting.DayAndTime.Any()) 
+					dayAndTime = (null != meeting.DayAndTime && meeting.DayAndTime.Any())
 						? meeting.DayAndTime.ToList() // (from dayTime in meeting.DayAndTime orderby dayTime.MeetingDay, dayTime.StartTime.Ticks select dayTime).ToList()
 						: new List<MeetingSpecific>();
+					if (null != dayAndTime && !dayAndTime.Any())
+					{
+						for (var t = 0; t < 7; t++)
+						{
+							dayAndTime.Add(new MeetingSpecific { MeetingDay = t, StartTime = TimeSpan.FromTicks(0), EndTime = TimeSpan.FromTicks(0) });
+						}
+					}
 					if (null != dayAndTime)
 					{
-						if (!dayAndTime.Any() || dayAndTime.Any() && !dayAndTime.Contains(meetingSpecifics) && null != dayAndTime.FirstOrDefault(d => d.MeetingDay == meetingSpecifics.MeetingDay 
+						if (dayAndTime.Any() && !dayAndTime.Contains(meetingSpecifics) && null == dayAndTime.FirstOrDefault(d => d.MeetingDay == meetingSpecifics.MeetingDay
 								&& meetingSpecifics.StartTime.Ticks == d.StartTime.Ticks) && meetingSpecifics.StartTime.Ticks > 0)
 						{
 							for (var t = 0; t < 7; t++)
@@ -136,7 +143,11 @@ namespace FindMyChair.Scrapers
 							}
 						}
 					}
-
+					var lastRow = (dayAndTime.Count > 7) ? dayAndTime.GetRange(dayAndTime.Count - 7, 7).Sum(t => t.StartTime.Ticks) : -1;
+					if (lastRow <= 0)
+					{
+						dayAndTime.RemoveRange(dayAndTime.Count - 7, 7);
+					}
 					meeting.DayAndTime = dayAndTime.AsEnumerable();
 
 					if (meetingExist)
@@ -149,7 +160,7 @@ namespace FindMyChair.Scrapers
 					else
 					{
 						meetingList.Add(meeting);
-					}	
+					}
 				}
 			}
 
