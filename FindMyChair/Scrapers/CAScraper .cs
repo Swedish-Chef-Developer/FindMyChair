@@ -119,8 +119,8 @@ namespace FindMyChair.Scrapers
 						: new List<MeetingSpecific>();
 					if (null != dayAndTime)
 					{
-						if (!dayAndTime.Any() || dayAndTime.Any(d => d.MeetingDay == meetingSpecifics.MeetingDay 
-								&& meetingSpecifics.StartTime.Ticks != d.StartTime.Ticks))
+						if (!dayAndTime.Any() || dayAndTime.Any() && !dayAndTime.Contains(meetingSpecifics) && null != dayAndTime.FirstOrDefault(d => d.MeetingDay == meetingSpecifics.MeetingDay 
+								&& meetingSpecifics.StartTime.Ticks == d.StartTime.Ticks) && meetingSpecifics.StartTime.Ticks > 0)
 						{
 							for (var t = 0; t < 7; t++)
 							{
@@ -129,8 +129,8 @@ namespace FindMyChair.Scrapers
 						}
 						for (var t = 0; t < dayAndTime.Count; t++)
 						{
-							if (dayAndTime[t].MeetingDay == meetingSpecifics.MeetingDay && dayAndTime[t].StartTime.Ticks <= 0
-								|| dayAndTime[t].MeetingDay == meetingSpecifics.MeetingDay && meetingSpecifics.StartTime.Ticks > dayAndTime[t].StartTime.Ticks)
+							if (dayAndTime.Contains(meetingSpecifics) || meetingSpecifics.StartTime.Ticks <= 0) continue;
+							if (dayAndTime[t].MeetingDay == meetingSpecifics.MeetingDay && dayAndTime[t].StartTime.Ticks <= 0 && meetingSpecifics.StartTime.Ticks > 0)
 							{
 								dayAndTime[t] = meetingSpecifics;
 							}
