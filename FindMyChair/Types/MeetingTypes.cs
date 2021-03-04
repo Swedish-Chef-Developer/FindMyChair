@@ -28,7 +28,29 @@ namespace FindMyChair.Types
         Step = 9,
         [Description("Traditionsmöte")]
         Tradition = 10,
+        [Description("Oppet sista")]
+        OpenLast = 11,
+        [Description("Djurfritt")]
+        AnimalFree = 12,
+        [Description("Rullstols vänligt")]
+        HandicapFriendly = 13,
+        [Description("Barnfritt")]
+        KidFree = 14,
+        [Description("Barnvänligt")]
+        KidFriendly = 15,
+        [Description("Öppet första")]
+        OpenFirst = 16,
+        [Description("Ickebinära")]
+        NonBinary = 17,
+        [Description("Persiskt")]
+        Persian = 18,
+        [Description("Spanska")]
+        Spanish = 19,
+        [Description("Engelska")]
+        English = 20,
+        [Description("HBQTmöte")]
+        HBQT = 21,
         [Description("")]
-        NotSet = 11
+        NotSet = 22
     }
 }

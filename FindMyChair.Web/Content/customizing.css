@@ -407,6 +407,7 @@ input[type="checkbox"] {
 
 .checkbox-inline {
 	display: inline-block;
+	margin-top: 0;
 }
 
 .checkbox-right {

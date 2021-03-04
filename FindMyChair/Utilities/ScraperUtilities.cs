@@ -60,5 +60,43 @@ namespace FindMyChair.Utilities
 			using var jsonTextReader = new JsonTextReader(sr);
 			return serializer.Deserialize(jsonTextReader);
 		}
+
+		public MeetingTypes GetNaMeetingTypes(string naVersion)
+		{
+			switch (naVersion.Trim().ToLower())
+			{
+				case "\u00d6":
+					return MeetingTypes.Open;
+				case "tc":
+				case "vw":
+					return MeetingTypes.Online;
+				case "k":
+					return MeetingTypes.Womens;
+				case "s":
+					return MeetingTypes.Closed;
+				case "df":
+					return MeetingTypes.AnimalFree;
+				case "bt":
+					return MeetingTypes.KidFriendly;
+				case "\u00d6f":
+					return MeetingTypes.OpenFirst;
+				case "\u00d6s":
+					return MeetingTypes.OpenLast;
+				case "bf":
+					return MeetingTypes.KidFree;
+				case "ib":
+					return MeetingTypes.NonBinary;
+				case "sp":
+					return MeetingTypes.Spanish;
+				case "en":
+					return MeetingTypes.English;
+				case "per":
+					return MeetingTypes.Persian;
+				case "hbqt+":
+					return MeetingTypes.HBQT;
+				default:
+					return MeetingTypes.NotSet;
+			}
+		}
 	}
 }

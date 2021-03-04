@@ -1,10 +1,11 @@
 ﻿@using FindMyChair.Models.Meetings;
+@using FindMyChair.Web.ViewModels.Meetings;
 @using System;
 @using System.Globalization;
 @using FindMyChair.Types;
 @using FindMyChair.Client;
 @using FindMyChair.Utilities;
-@model List<Meeting>
+@model MeetingListViewModel
 @{
 	var timeCounter = 0;
 	var scraperUtility = new ScraperUtilities();
@@ -16,13 +17,13 @@
 @if (null != Model)
 {
 	<section class="inner-content" id="list-content">
-		@if (!string.IsNullOrWhiteSpace(ViewBag.MeetingTitle))
+		@if (!string.IsNullOrWhiteSpace(Model.Title))
 		{
-		<div class="heading">
-			<h3>@ViewBag.MeetingTitle</h3>
-		</div>
+			<div class="heading">
+				<h3>@Model.Title</h3>
+			</div>
 		}
-		@foreach (var meeting in Model)
+		@foreach (var meeting in Model.MeetingsList.ToList())
 		{
 			var counter = 0;
 			<div class="meeting-wrapper">
@@ -54,16 +55,21 @@
 						}
 						@if (!string.IsNullOrWhiteSpace(meeting.Address.LocationLink) &&
 							(!string.IsNullOrWhiteSpace(meeting.Address.Street) ||
-							!string.IsNullOrWhiteSpace(meeting.Address.City)))
+							!string.IsNullOrWhiteSpace(meeting.Address.City)) ||
+							!string.IsNullOrWhiteSpace(meeting.Address.FullAddress))
 						{
 							<div>
 								<div class="location-icon"></div>
 								<span class="meeting-title">Besöksadress:</span>
 								<span clas="meeting-address">
-									<a href="@meeting.Address.LocationLink" title="@meeting.GroupName" class="meeting-address-link-location">
+									<a href="@meeting.Address.LocationLink" title="@meeting.GroupName" class="meeting-address-link-location" target="=_blank">
 										@if (!string.IsNullOrWhiteSpace(meeting.Address.Street) && !string.IsNullOrWhiteSpace(meeting.Address.City))
 										{
 											<span>@string.Format("{0}, {1}", meeting.Address.Street, meeting.Address.City)</span>
+										}
+										else if (!string.IsNullOrWhiteSpace(meeting.Address.FullAddress))
+										{
+											<span>@meeting.Address.FullAddress</span>
 										}
 										else
 										{
@@ -101,6 +107,28 @@
 								</span>
 							</div>
 						}
+						@if (!string.IsNullOrWhiteSpace(meeting.GroupLink))
+						{
+							<div>
+								<span class="meeting-title">Länk:</span>
+								<span clas="meeting-link">
+									<a href="@meeting.GroupLink" title="@meeting.GroupName" class="meeting-address-link-location" target="=_blank">
+										<span>@meeting.GroupLink</span>
+									</a>
+								</span>
+							</div>
+						}
+						@if (!string.IsNullOrWhiteSpace(meeting.OnlineLink))
+						{
+							<div>
+								<span class="meeting-title">Online länk:</span>
+								<span clas="meeting-link">
+									<a href="@meeting.OnlineLink" title="@meeting.GroupName" class="meeting-address-link-location" target="=_blank">
+										<span>@meeting.OnlineLink</span>
+									</a>
+								</span>
+							</div>
+						}
 						@if (!string.IsNullOrWhiteSpace(meeting.Note))
 						{
 							<div>
@@ -132,11 +160,13 @@
 							&& !string.IsNullOrWhiteSpace(meeting.AdditionalInformationHtmlString)
 							&& null == meeting.AdditionalInfo)
 						{
-							<div class="meeting-additional-information-expand">Mer Information</div>
-							<div class="meeting-additional-info">
-								<span class="meeting-additional-information">
-									<span>@Html.Raw(meeting.AdditionalInformationHtmlString)</span>
-								</span>
+							<div class="meeting-additional-information-expand" data-toggle="collapse"
+								 href="#additionalInformation_@meeting.Id"
+								 role="button"
+								 aria-expanded="false"
+								 aria-controls="additionalInformation_@meeting.Id"><span class="expand"></span><span class="expand-text">Mer Information</span></div>
+							<div class="meeting-additional-info collapse multi-collapse" id="additionalInformation_@meeting.Id">
+								<span>@Html.Raw(meeting.AdditionalInformationHtmlString)</span>
 							</div>
 						}
 					</div>

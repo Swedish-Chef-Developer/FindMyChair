@@ -8,7 +8,7 @@
 @model NearMeViewModel
 @if (null != Model)
 {
-	if (null != Model.UpcomingMeetingsList && Model.UpcomingMeetingsList.Any())
+	if (null != Model.UpcomingMeetingsList && Model.UpcomingMeetingsList.MeetingsList.Any())
 	{
 		Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.UpcomingMeetingsList);
 	}

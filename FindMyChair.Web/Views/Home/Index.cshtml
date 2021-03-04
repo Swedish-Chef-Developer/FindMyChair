@@ -20,21 +20,20 @@
 		<div id="today" class="tab-pane active">
 			@if (null != Model.NearMeViewModel)
 			{
+				Html.RenderPartial("~/Views/Home/Partials/_NearMeFilter.cshtml");
 				Html.RenderPartial("~/Views/Home/Partials/_NearMe.cshtml", Model.NearMeViewModel);
 			}
 		</div>
 		<div id="aa" class="tab-pane">
-			@if (null != Model.AAMeetingsList && Model.AAMeetingsList.Any())
+			@if (null != Model.AAMeetingsList && Model.AAMeetingsList.MeetingsList.Any())
 			{
-				ViewBag.MeetingTitle = "AA möten";
 				Html.RenderPartial("~/Views/Shared/Partials/_ListingsFilterView.cshtml", Model.FilterSorting);
 				Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.AAMeetingsList);
 			}
 		</div>
 		<div id="ca" class="tab-pane">
-			@if (null != Model.CAMeetingsList && Model.CAMeetingsList.Any())
+			@if (null != Model.CAMeetingsList && Model.CAMeetingsList.MeetingsList.Any())
 			{
-				ViewBag.MeetingTitle = "CA möten";
 				Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.CAMeetingsList);
 			}
 		</div>
@@ -42,27 +41,11 @@
 			DAA
 		</div>
 		<div id="na" class="tab-pane">
-			NA
+			@if (null != Model.NAMeetingsList && Model.NAMeetingsList.MeetingsList.Any())
+			{
+				Html.RenderPartial("~/Views/Home/Partials/_MeetingList.cshtml", Model.NAMeetingsList);
+			}
 		</div>
 	</div>
 	}
 </div>
-<script>
-$(document).ready(function () {
-	$('#filtersortform').submit(function () {
-		$.ajax({
-			type: this.method,
-			url: this.action,
-			data: $(this).serialize(),
-			dataType: 'html',
-			success: function (response) {
-				$('#aa #list-content').html(response);
-			},
-			error: function (error) {
-				console.log(error);
-			}
-		});
-		return false;
-	});
-});
-</script>

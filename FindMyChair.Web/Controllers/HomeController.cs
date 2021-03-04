@@ -43,6 +43,7 @@ namespace FindMyChair.Web.Controllers
 		public async Task<ViewResult> Index()
 		{
 			var model = new MeetingsListViewModel();
+			var meetingModel = new MeetingListViewModel();
 			if (null == HttpContext.Cache.Get("AAMeetingList"))
 			{
 				var meetings = await _aaClient.GetMeetingsList();
@@ -56,15 +57,31 @@ namespace FindMyChair.Web.Controllers
 			}
 			var caMeetingList = HttpContext.Cache.Get("CAMeetingList") as List<Meeting>;
 			var naList = _naClient.GetMeetingsList();
-			model.AAMeetingsList = aaMeetingList;
-			model.CAMeetingsList = caMeetingList;
+			meetingModel.Title = "AA möten";
+			meetingModel.ListId = "aa";
+			meetingModel.MeetingsList = aaMeetingList;
+			model.AAMeetingsList = meetingModel;
+			meetingModel = new MeetingListViewModel();
+			meetingModel.Title = "CA möten";
+			meetingModel.ListId = "ca";
+			meetingModel.MeetingsList = caMeetingList;
+			model.CAMeetingsList = meetingModel;
+			meetingModel = new MeetingListViewModel();
+			meetingModel.Title = "NA möten";
+			meetingModel.ListId = "na";
+			meetingModel.MeetingsList = await _naClient.GetMeetingsList();
+			model.NAMeetingsList = meetingModel;
 			if (null == Session["AATodaysMeetingList"])
 			{
 				Session["AATodaysMeetingList"] = await _aaClient.GetUpcomingMeetingsList(aaMeetingList);
 			}
+			meetingModel = new MeetingListViewModel();
+			meetingModel.Title = "Dagens möten";
+			meetingModel.ListId = "today";
+			meetingModel.MeetingsList = Session["AATodaysMeetingList"] as List<Meeting>;
 			var meetingListViewModel = new NearMeViewModel
 			{
-				UpcomingMeetingsList = Session["AATodaysMeetingList"] as List<Meeting>
+				UpcomingMeetingsList = meetingModel
 			};
 			meetingListViewModel.BingApiKey = _bingApiKey;
 			/*UNCOMMENT TO ADD MAP
@@ -168,8 +185,14 @@ namespace FindMyChair.Web.Controllers
 						break;
 				}
 			}
+			var model = new MeetingListViewModel
+			{
+				MeetingsList = sortedList,
+				Title = "AA möten",
+				ListId = "aa"
+			};
 			if (null != sortedList && sortedList.Any())
-				return PartialView("~/Views/Home/Partials/_MeetingList.cshtml", sortedList);
+				return PartialView("~/Views/Home/Partials/_MeetingList.cshtml", model);
 			else
 				return Content("<div class=\"no-result\">Inga resultat...</div>");
 		}

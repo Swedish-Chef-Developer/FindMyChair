@@ -203,6 +203,7 @@
     <Compile Include="Utilities\CultureHelper.cs" />
     <Compile Include="Utilities\GlobalisationHelper.cs" />
     <Compile Include="Utilities\Utilities.cs" />
+    <Compile Include="ViewModels\Meetings\MeetingListViewModel.cs" />
     <Compile Include="ViewModels\Meetings\MeetingsListViewModel.cs" />
     <Compile Include="ViewModels\Meetings\NearMeViewModel.cs" />
   </ItemGroup>
@@ -222,6 +223,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
+    <Content Include="Scripts\customize.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
     <Content Include="Scripts\jquery-3.4.1.slim.js" />
@@ -250,6 +252,7 @@
     <Content Include="Views\Home\Partials\_NearMe.cshtml" />
     <Content Include="Views\Home\Partials\_MeetingList.cshtml" />
     <Content Include="Views\Shared\Partials\_ListingsFilterView.cshtml" />
+    <Content Include="Views\Home\Partials\_NearMeFilter.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

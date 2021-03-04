@@ -15,6 +15,8 @@ namespace FindMyChair.Models.Meetings
         public int Id { get; set; }
         public string City { get; set; }
         public string Street { get; set; }
+        public string Zip { get; set; }
+        public string FullAddress { get; set; }
         public string LocationLink { get; set; }
         public IEnumerable<District> Districts{ get; set; }
         public double Longitude { get; set; }
